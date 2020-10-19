@@ -1,0 +1,12 @@
+steps:
+- name: "docker"
+  args: ["login", "--username=${_DOCKER_HUB_USERNAME}", "--password=${_DOCKER_HUB_PASSWORD}"]
+- name: "docker"
+  args: ["build", "-t", "${_REPO_PREFIX}${_REPO_NAME}","."]
+- name: "docker"
+  args: ["push", "${_REPO_PREFIX}${_REPO_NAME}"]
+substitutions:
+    _DOCKER_HUB_USERNAME: user
+    _DOCKER_HUB_PASSWORD: password
+    _REPO_NAME: repo
+    _REPO_PREFIX: prefix/

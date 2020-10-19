@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<license product="PiXYZStudio">
+  <version/>
+  <validity start="" end=""/>
+  <customer>
+    <company/>
+    <name/>
+    <email/>
+    <site/>
+    <phone/>
+  </customer>
+  <floatting>True</floatting>
+  <server>
+    <port>{YOUR_PORT}</port>
+    <host>{YOUR_HOSTNAME}</host>
+    <flexLM>True</flexLM>
+  </server>
+  <machine/>
+</license>
