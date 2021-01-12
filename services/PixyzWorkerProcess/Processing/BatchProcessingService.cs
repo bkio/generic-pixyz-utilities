@@ -49,14 +49,17 @@ namespace PixyzWorkerProcess.Processing
         private readonly HttpClient Client = new HttpClient();
         //Upload Requests
         List<HttpWebRequest> WebRequests = new List<HttpWebRequest>();
+        List<Stream> WriteStreams = new List<Stream>();
 
         private ConcurrentQueue<Node> NodesToWriteAndCompress = new ConcurrentQueue<Node>();
         private ConcurrentQueue<Node> NodesToWrite = new ConcurrentQueue<Node>();
 
         private bool QueueComplete = false;
-        
+
 
         private Dictionary<EProcessedFileType, string> UploadUrls = new Dictionary<EProcessedFileType, string>();
+        private bool IsFileWrite = false;
+
 
         private string NotifyDoneUrl = "";
 
@@ -73,14 +76,14 @@ namespace PixyzWorkerProcess.Processing
                 Instance.MemoryService = MemoryService;
                 return Instance.SubscribeToPubSub(MemoryService.GetPubSubService(), LogError);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _ErrorMessageAction?.Invoke($"{ex.Message}\n{ex.StackTrace}");
                 return false;
             }
         }
 
-        public void SetUploadUrls(string _HierarchyCompressed, string _HierarchyUncompressed, string _MetadataCompressed, string _MetadataUncompressed, string _GeometryCompressed, string _GeometryUncompressed, string _NotifyDoneUrl)
+        public void SetUploadUrls(string _HierarchyCompressed, string _HierarchyUncompressed, string _MetadataCompressed, string _MetadataUncompressed, string _GeometryCompressed, string _GeometryUncompressed, string _NotifyDoneUrl, bool _IsFileWrite = false)
         {
             UploadUrls.Add(EProcessedFileType.HIERARCHY_RAF, _HierarchyUncompressed);
             UploadUrls.Add(EProcessedFileType.HIERARCHY_CF, _HierarchyCompressed);
@@ -92,6 +95,8 @@ namespace PixyzWorkerProcess.Processing
             UploadUrls.Add(EProcessedFileType.METADATA_CF, _MetadataCompressed);
 
             NotifyDoneUrl = _NotifyDoneUrl;
+
+            IsFileWrite = _IsFileWrite;
         }
 
         public void AddItemToQueues(Node Item, Node ItemCompress)
@@ -100,14 +105,14 @@ namespace PixyzWorkerProcess.Processing
             NodesToWrite.Enqueue(Item);
         }
 
-        public void StartProcessingBatchData(string _Filename, Action<string> _ErrorMessageAction = null)
+        public void StartProcessingBatchData(Action<string> _ErrorMessageAction = null)
         {
             State = RUNNING_STATE;
             ManualResetEvent WaitCompressedFiles = new ManualResetEvent(false);
             ManualResetEvent WaitUnCompressedFiles = new ManualResetEvent(false);
 
-            ProcessQueue(_Filename, _ErrorMessageAction, WaitCompressedFiles, NodesToWriteAndCompress, EDeflateCompression.Compress);
-            ProcessQueue(_Filename, _ErrorMessageAction, WaitUnCompressedFiles, NodesToWrite, EDeflateCompression.DoNotCompress);
+            ProcessQueue(_ErrorMessageAction, WaitCompressedFiles, NodesToWriteAndCompress, EDeflateCompression.Compress);
+            ProcessQueue(_ErrorMessageAction, WaitUnCompressedFiles, NodesToWrite, EDeflateCompression.DoNotCompress);
 
             BTaskWrapper.Run(() =>
             {
@@ -134,14 +139,14 @@ namespace PixyzWorkerProcess.Processing
             });
         }
 
-        private void ProcessQueue(string _Filename, Action<string> _ErrorMessageAction, ManualResetEvent ProcessQueueWait, ConcurrentQueue<Node> ProcessQueue, EDeflateCompression QueueCompressMode)
+        private void ProcessQueue(Action<string> _ErrorMessageAction, ManualResetEvent ProcessQueueWait, ConcurrentQueue<Node> ProcessQueue, EDeflateCompression QueueCompressMode)
         {
             BTaskWrapper.Run(() =>
             {
                 try
                 {
                     _ErrorMessageAction?.Invoke("Start processing Queue");
-                    Dictionary<ENodeType, StreamStruct> WriteStreams = CreateStreams(_Filename, QueueCompressMode);
+                    Dictionary<ENodeType, StreamStruct> WriteStreams = CreateStreams(QueueCompressMode);
                     using (XStreamWriter Writer = new XStreamWriter(WriteStreams))
                     {
                         while (!QueueComplete || ProcessQueue.Count > 0)
@@ -215,6 +220,17 @@ namespace PixyzWorkerProcess.Processing
             {
                 CurrentHierarchyNode.GeometryParts = new List<HierarchyNode.GeometryPart>();
             }
+
+            if (CurrentHierarchyNode.GeometryParts.Count > 0)
+            {
+                for (int i = 0; i < CurrentHierarchyNode.GeometryParts.Count; ++i)
+                {
+                    if (CurrentHierarchyNode.GeometryParts[i].Color == null)
+                    {
+                        CurrentHierarchyNode.GeometryParts[i].Color = new ServiceUtilities.Process.Geometry.Color();
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -225,15 +241,24 @@ namespace PixyzWorkerProcess.Processing
             QueueComplete = true;
         }
 
+
+
         public void EndProcessingBatchData(Action<string> _ErrorMessageAction)
         {
-            //Upload files and change status to completed
-            State = UploadAllFiles(LogError);
+            if (!IsFileWrite)
+            {
+                //Upload files and change status to completed
+                State = UploadAllFiles(LogError);
+            }
+            else
+            {
+                State = CompleteWrites(LogError);
+            }
 
             //Call out to cad process to let it know it can destroy the pod
             try
             {
-                if (State == SUCCESS_STATE)
+                if (State == SUCCESS_STATE && !IsFileWrite)
                 {
                     _ErrorMessageAction?.Invoke($"Ending Pod : {NotifyDoneUrl}");
 
@@ -241,7 +266,7 @@ namespace PixyzWorkerProcess.Processing
                     Task<HttpResponseMessage> ResponseTask = Client.GetAsync(NotifyDoneUrl);
                     ResponseTask.Wait();
 
-                    if(ResponseTask.Result.StatusCode != HttpStatusCode.OK)
+                    if (ResponseTask.Result.StatusCode != HttpStatusCode.OK)
                     {
                         State = FAILED_STATE;
                         Task<string> ContentReadTask = ResponseTask.Result.Content.ReadAsStringAsync();
@@ -251,7 +276,7 @@ namespace PixyzWorkerProcess.Processing
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _ErrorMessageAction?.Invoke($"Failed to end pod : {ex.Message}\n{ex.StackTrace}");
                 State = FAILED_STATE;
@@ -265,57 +290,96 @@ namespace PixyzWorkerProcess.Processing
             return _PubSub.CustomSubscribe("models", (Message, Json) =>
             {
                 //make two copies so that writers don't interfere with each other
-                NodeMessage MessageReceived = JsonConvert.DeserializeObject<NodeMessage>(Json);
-                NodeMessage MessageReceivedCompressCopy = JsonConvert.DeserializeObject<NodeMessage>(Json);
 
                 try
                 {
-                    if (!MessageReceived.Done)
-                    {
-                        if (MessageReceived.Errors != null && MessageReceived.Errors.Length > 0)
-                        {
-                            for (int i = 0; i < MessageReceived.Errors.Length; ++i)
-                            {
-                                _ErrorMessageAction?.Invoke(MessageReceived.Errors[i]);
-                            }
-                        }
+                    NodeMessage MessageReceived = JsonConvert.DeserializeObject<NodeMessage>(Json);
+                    NodeMessage MessageReceivedCompressCopy = JsonConvert.DeserializeObject<NodeMessage>(Json);
 
-                        if (MessageReceived.HierarchyNode != null)
-                        {
-                            AddItemToQueues(MessageReceived.HierarchyNode, MessageReceivedCompressCopy.HierarchyNode);
-                        }
-
-                        if (MessageReceived.GeometryNode != null)
-                        {
-                            AddItemToQueues(MessageReceived.GeometryNode, MessageReceivedCompressCopy.GeometryNode);
-                        }
-
-                        if (MessageReceived.MetadataNode != null)
-                        {
-                            AddItemToQueues(MessageReceived.MetadataNode, MessageReceivedCompressCopy.MetadataNode);
-                        }
-
-                        Interlocked.Increment(ref QueuedMessageCount);
-                        
-
-                    }
-                    else
-                    {
-                        ExpectedMessageCount = MessageReceived.MessageCount;
-                    }
-                    //Check if Expected message count has been set
-                    if(ExpectedMessageCount != -1 && QueuedMessageCount >= ExpectedMessageCount)
-                    {
-                        _ErrorMessageAction?.Invoke($"Received End signal for {ExpectedMessageCount} messages");
-                        SignalQueuingComplete();
-                    }
+                    AddMessage(MessageReceived, MessageReceivedCompressCopy, _ErrorMessageAction);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     _ErrorMessageAction?.Invoke($"{ex.Message}\n{ex.StackTrace}");
                 }
 
             });
+        }
+
+        SortedSet<ulong> TestSet = new SortedSet<ulong>();
+
+        public void AddMessage(NodeMessage Message, NodeMessage MessageCompressCopy, Action<string> _ErrorMessageAction = null)
+        {
+            if (!Message.Done)
+            {
+                if (Message.Errors != null && Message.Errors.Length > 0)
+                {
+                    for (int i = 0; i < Message.Errors.Length; ++i)
+                    {
+                        _ErrorMessageAction?.Invoke(Message.Errors[i]);
+                    }
+                }
+
+                if (Message.HierarchyNode != null)
+                {
+                    AddItemToQueues(Message.HierarchyNode, MessageCompressCopy.HierarchyNode);
+                }
+
+                if (Message.GeometryNode != null)
+                {
+                    lock (TestSet)
+                    {
+                        TestSet.Add(Message.GeometryNode.UniqueID);
+                    }
+                    AddItemToQueues(Message.GeometryNode, MessageCompressCopy.GeometryNode);
+                }
+
+                if (Message.MetadataNode != null)
+                {
+                    AddItemToQueues(Message.MetadataNode, MessageCompressCopy.MetadataNode);
+                }
+
+                Interlocked.Increment(ref QueuedMessageCount);
+            }
+            else
+            {
+                ExpectedMessageCount = Message.MessageCount;
+            }
+
+
+            _ErrorMessageAction?.Invoke($"Message Count: {QueuedMessageCount}");
+            //Check if Expected message count has been set
+            if (ExpectedMessageCount != -1 && QueuedMessageCount >= ExpectedMessageCount)
+            {
+                _ErrorMessageAction?.Invoke($"Received End signal for {ExpectedMessageCount} messages");
+                SignalQueuingComplete();
+            }
+        }
+
+        private string CompleteWrites(Action<string> _ErrorMessageAction = null)
+        {
+            _ErrorMessageAction?.Invoke("Uploading files");
+
+            try
+            {
+                for (int i = 0; i < WriteStreams.Count; ++i)
+                {
+                    try
+                    {
+                        WriteStreams[i].Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        _ErrorMessageAction?.Invoke($"{ex.Message}\n{ex.StackTrace}");
+                    }
+                }
+                return SUCCESS_STATE;
+            }
+            catch (Exception ex)
+            {
+                _ErrorMessageAction?.Invoke($"{ex.Message}\n{ex.StackTrace}");
+                return FAILED_STATE;
+            }
         }
 
         private string UploadAllFiles(Action<string> _ErrorMessageAction = null)
@@ -324,7 +388,7 @@ namespace PixyzWorkerProcess.Processing
             Task[] Tasks = new Task[WebRequests.Count];
             try
             {
-                for(int i = 0; i < WebRequests.Count; ++i)
+                for (int i = 0; i < WebRequests.Count; ++i)
                 {
                     Tasks[i] = WebRequests[i].GetResponseAsync();
                 }
@@ -341,7 +405,7 @@ namespace PixyzWorkerProcess.Processing
                 return FAILED_STATE;
             }
         }
-        
+
         private static HttpWebRequest CreateWebRequest(string _UploadUrl)
         {
             HttpWebRequest Request = (HttpWebRequest)HttpWebRequest.Create(_UploadUrl);
@@ -355,8 +419,64 @@ namespace PixyzWorkerProcess.Processing
             return Request;
         }
 
-        private Dictionary<ENodeType, StreamStruct> CreateStreams(string _Name, EDeflateCompression CompressMode)
+        private Dictionary<ENodeType, StreamStruct> CreateFileStreams(EDeflateCompression CompressMode)
         {
+            Dictionary<ENodeType, StreamStruct> Streams = new Dictionary<ENodeType, StreamStruct>();
+
+            EProcessedFileType HierarchyFileType = EProcessedFileType.HIERARCHY_RAF;
+            if (CompressMode == EDeflateCompression.Compress)
+            {
+                HierarchyFileType = EProcessedFileType.HIERARCHY_CF;
+            }
+
+            Stream WriteHierarchyStream = new FileStream(UploadUrls[HierarchyFileType], FileMode.Create);
+            lock (WriteStreams)
+            {
+                WriteStreams.Add(WriteHierarchyStream);
+            }
+            StreamStruct HierarchyStreamStruct = new StreamStruct(WriteHierarchyStream, CompressMode);
+
+
+            EProcessedFileType GeometryFileType = EProcessedFileType.GEOMETRY_RAF;
+            if (CompressMode == EDeflateCompression.Compress)
+            {
+                GeometryFileType = EProcessedFileType.GEOMETRY_CF;
+            }
+
+            Stream WriteGeometryStream = new FileStream(UploadUrls[GeometryFileType], FileMode.Create);
+            lock (WriteStreams)
+            {
+                WriteStreams.Add(WriteGeometryStream);
+            }
+            StreamStruct GeometryStreamStruct = new StreamStruct(WriteGeometryStream, CompressMode);
+
+            EProcessedFileType MetadateFileType = EProcessedFileType.METADATA_RAF;
+            if (CompressMode == EDeflateCompression.Compress)
+            {
+                MetadateFileType = EProcessedFileType.METADATA_CF;
+            }
+
+            Stream WriteMetadataStream = new FileStream(UploadUrls[MetadateFileType], FileMode.Create);
+            lock (WriteStreams)
+            {
+                WriteStreams.Add(WriteMetadataStream);
+            }
+            StreamStruct MetadataStreamStruct = new StreamStruct(WriteMetadataStream, CompressMode);
+
+            Streams.Add(ENodeType.Hierarchy, HierarchyStreamStruct);
+            Streams.Add(ENodeType.Geometry, GeometryStreamStruct);
+            Streams.Add(ENodeType.Metadata, MetadataStreamStruct);
+
+            return Streams;
+        }
+
+        private Dictionary<ENodeType, StreamStruct> CreateStreams(EDeflateCompression CompressMode)
+        {
+            if (IsFileWrite)
+            {
+                return CreateFileStreams(CompressMode);
+            }
+
             Dictionary<ENodeType, StreamStruct> Streams = new Dictionary<ENodeType, StreamStruct>();
 
             EProcessedFileType HierarchyFileType = EProcessedFileType.HIERARCHY_RAF;
@@ -396,7 +516,7 @@ namespace PixyzWorkerProcess.Processing
             }
 
             HttpWebRequest MetadataRequest = CreateWebRequest(UploadUrls[MetadateFileType]);
-            lock(WebRequests)
+            lock (WebRequests)
             {
                 WebRequests.Add(MetadataRequest);
             }

@@ -41,14 +41,20 @@ namespace PixyzWorkerProcess
                     new string[] { "UPLOAD_GEOMETRY_RAF" },
                     new string[] { "UPLOAD_METADATA_CF" },
                     new string[] { "UPLOAD_METADATA_RAF" },
+                    new string[] { "IS_FILE_WRITE" },
 
                     new string[] { "CAD_PROCESS_NOTIFY_URL" }
                 }))
                 return;
 
+            bool IsFileWrite = bool.Parse(ServInit.RequiredEnvironmentVariables["IS_FILE_WRITE"]);
             bool bInitSuccess = true;
-            bInitSuccess &= ServInit.WithFileService();
-            bInitSuccess &= ServInit.WithTracingService();
+
+            if(!IsFileWrite)
+            {
+                bInitSuccess &= ServInit.WithFileService();
+                bInitSuccess &= ServInit.WithTracingService();
+            }
 
             //Wait for redis
             int RetryCount = 0;
@@ -85,24 +91,28 @@ namespace PixyzWorkerProcess
                 ServInit.RequiredEnvironmentVariables["UPLOAD_METADATA_RAF"],
                 ServInit.RequiredEnvironmentVariables["UPLOAD_GEOMETRY_CF"],
                 ServInit.RequiredEnvironmentVariables["UPLOAD_GEOMETRY_RAF"],
-                ServInit.RequiredEnvironmentVariables["CAD_PROCESS_NOTIFY_URL"]);
+                ServInit.RequiredEnvironmentVariables["CAD_PROCESS_NOTIFY_URL"],
+                IsFileWrite);
 
-            BatchProcessingService.Instance.StartProcessingBatchData("file", (Message) => { Console.WriteLine(Message); });
+            BatchProcessingService.Instance.StartProcessingBatchData((Message) => { Console.WriteLine(Message); });
 
-            Resources_DeploymentManager.Get().SetDeploymentBranchNameAndBuildNumber(ServInit.RequiredEnvironmentVariables["DEPLOYMENT_BRANCH_NAME"], ServInit.RequiredEnvironmentVariables["DEPLOYMENT_BUILD_NUMBER"]);
 
-            var WebServiceEndpoints = new List<BWebPrefixStructure>()
+            //if (!IsFileWrite)
+            //{
+                Resources_DeploymentManager.Get().SetDeploymentBranchNameAndBuildNumber(ServInit.RequiredEnvironmentVariables["DEPLOYMENT_BRANCH_NAME"], ServInit.RequiredEnvironmentVariables["DEPLOYMENT_BUILD_NUMBER"]);
+
+                var WebServiceEndpoints = new List<BWebPrefixStructure>()
             {
                 new BWebPrefixStructure(new string[] { "/healthcheck" }, () => new HealthCheckRequest())
             };
 
-            var BWebService = new BWebService(WebServiceEndpoints.ToArray(), ServInit.ServerPort, ServInit.TracingService);
+                var BWebService = new BWebService(WebServiceEndpoints.ToArray(), ServInit.ServerPort, ServInit.TracingService);
 
-            BWebService.Run((string Message) =>
-            {
-                ServInit.LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Info, Message), ServInit.ProgramID, "WebService");
-            });
-
+                BWebService.Run((string Message) =>
+                {
+                    ServInit.LoggingService.WriteLogs(BLoggingServiceMessageUtility.Single(EBLoggingServiceLogType.Info, Message), ServInit.ProgramID, "WebService");
+                });
+            //}
 
             Thread.Sleep(Timeout.Infinite);
         }
