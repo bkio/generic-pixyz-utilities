@@ -5,4 +5,5 @@ When using this library remove pubsub limits from your redis instance to avoid i
 Do this by using rediscli and running the command:
 
   - CONFIG SET client-output-buffer-limit "normal 0 0 0 slave 0 0 0 pubsub 0 0 0"
-  - or setting the same value in redis.conf
+
+or setting the same value in redis.conf
