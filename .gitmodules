@@ -2,7 +2,7 @@
 	path = submodules/bfilesdk-dotnet
 	url = https://github.com/bkio/bfilesdk-dotnet.git
 	branch = master
-[submodule "Submodules/BDotNetFramework"]
+[submodule "submodules/BDotNetFramework"]
 	path = submodules/BDotNetFramework
 	url = https://github.com/bkio/BDotNetFramework.git
 	branch = master

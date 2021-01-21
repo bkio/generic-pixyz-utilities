@@ -105,7 +105,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BDat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities\BCloudServiceUtilities.csproj", "{DEB2F0E9-67B0-4D84-8ED9-86CE4371B438}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BFileSDK-Dotnet", "..\bfilesdk-dotnet\common\BFileSDK-Dotnet\BFileSDK-Dotnet.shproj", "{F286B3E7-DAAB-468C-8399-93D3A8F26394}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BFileSDK-Dotnet", "submodules\bfilesdk-dotnet\common\BFileSDK-Dotnet\BFileSDK-Dotnet.shproj", "{F286B3E7-DAAB-468C-8399-93D3A8F26394}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
