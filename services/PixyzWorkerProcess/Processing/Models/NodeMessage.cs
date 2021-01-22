@@ -21,7 +21,7 @@ namespace PixyzWorkerProcess.Processing.Models
         public MetadataNode MetadataNode { get; set; }
 
         [JsonProperty("geometryNode")]
-        public GeometryNode GeometryNode { get; set; }
+        public LodMessage GeometryNode { get; set; }
 
         [JsonProperty("done")]
         public bool Done { get; set; }

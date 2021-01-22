@@ -13,6 +13,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.IO.Compression;
+using System.Linq;
 
 namespace PixyzWorkerProcess.Processing
 {
@@ -293,8 +295,18 @@ namespace PixyzWorkerProcess.Processing
 
                 try
                 {
-                    NodeMessage MessageReceived = JsonConvert.DeserializeObject<NodeMessage>(Json);
-                    NodeMessage MessageReceivedCompressCopy = JsonConvert.DeserializeObject<NodeMessage>(Json);
+                    byte[] MessageBytes = Convert.FromBase64String(Json);
+                    MemoryStream InputStream = new MemoryStream(MessageBytes);
+                    MemoryStream OutputStream = new MemoryStream();
+                    using (DeflateStream decompressionStream = new DeflateStream(InputStream, CompressionMode.Decompress))
+                    {
+                        decompressionStream.CopyTo(OutputStream);
+                    }
+
+                    string DecompressedMessage = Encoding.UTF8.GetString(OutputStream.ToArray());
+
+                    NodeMessage MessageReceived = JsonConvert.DeserializeObject<NodeMessage>(DecompressedMessage);
+                    NodeMessage MessageReceivedCompressCopy = JsonConvert.DeserializeObject<NodeMessage>(DecompressedMessage);
 
                     AddMessage(MessageReceived, MessageReceivedCompressCopy, _ErrorMessageAction);
                 }
@@ -306,7 +318,28 @@ namespace PixyzWorkerProcess.Processing
             });
         }
 
-        SortedSet<ulong> TestSet = new SortedSet<ulong>();
+        private ConcurrentDictionary<ulong, LodMessage> GeometryNodeToAssemblePlain = new ConcurrentDictionary<ulong, LodMessage>();
+        private ConcurrentDictionary<ulong, LodMessage> GeometryNodeToAssembleCompressed = new ConcurrentDictionary<ulong, LodMessage>();
+
+        private static void MergeGeometry(ConcurrentDictionary<ulong, LodMessage> _GeometryStore, LodMessage NewMessage)
+        {
+
+                _GeometryStore.AddOrUpdate(NewMessage.UniqueID, NewMessage, (K, V) =>
+                {
+                    V.LODs.AddRange(NewMessage.LODs);
+                    return V;
+                });
+            
+        }
+
+        private static void CompleteMerge(ConcurrentDictionary<ulong, LodMessage> _GeometryStore)
+        {
+            Parallel.ForEach(_GeometryStore, (Node) => 
+            {
+                Node.Value.LODs = Node.Value.LODs.OrderByDescending(x => x.Indexes.Count).ToList();
+            });
+
+        }
 
         public void AddMessage(NodeMessage Message, NodeMessage MessageCompressCopy, Action<string> _ErrorMessageAction = null)
         {
@@ -327,11 +360,11 @@ namespace PixyzWorkerProcess.Processing
 
                 if (Message.GeometryNode != null)
                 {
-                    lock (TestSet)
-                    {
-                        TestSet.Add(Message.GeometryNode.UniqueID);
-                    }
-                    AddItemToQueues(Message.GeometryNode, MessageCompressCopy.GeometryNode);
+
+                    //AddItemToQueues(Message.GeometryNode, MessageCompressCopy.GeometryNode);
+
+                    MergeGeometry(GeometryNodeToAssemblePlain, Message.GeometryNode);
+                    MergeGeometry(GeometryNodeToAssembleCompressed, MessageCompressCopy.GeometryNode);
                 }
 
                 if (Message.MetadataNode != null)
@@ -352,6 +385,16 @@ namespace PixyzWorkerProcess.Processing
             if (ExpectedMessageCount != -1 && QueuedMessageCount >= ExpectedMessageCount)
             {
                 _ErrorMessageAction?.Invoke($"Received End signal for {ExpectedMessageCount} messages");
+                CompleteMerge(GeometryNodeToAssemblePlain);
+                CompleteMerge(GeometryNodeToAssembleCompressed);
+
+                foreach(var Node in GeometryNodeToAssemblePlain)
+                {
+                    //There should exist a copy of each message
+                    LodMessage Copy = GeometryNodeToAssembleCompressed[Node.Key];
+                    AddItemToQueues(Node.Value, Copy);
+                }
+
                 SignalQueuingComplete();
             }
         }
