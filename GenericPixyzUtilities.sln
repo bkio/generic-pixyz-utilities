@@ -137,7 +137,7 @@ Global
 		submodules\BDotNetFramework\Services\BServiceUtilities\BServiceUtilities.projitems*{cd786aa9-0eff-4445-b49c-fae46451f8bc}*SharedItemsImports = 13
 		submodules\BDotNetFramework\Utilities\ServiceUtilities_All\ServiceUtilities_All.projitems*{ced4e48f-9644-4dcf-a6a2-1d91eef01d87}*SharedItemsImports = 13
 		Submodules\BDotNetFramework\Services\BServiceUtilities-DatabaseService-AWS\BServiceUtilities-DatabaseService-AWS.projitems*{d41edae0-59e2-4faf-9fda-b36c7b22ac60}*SharedItemsImports = 13
-		..\bfilesdk-dotnet\common\BFileSDK-Dotnet\BFileSDK-Dotnet.projitems*{f286b3e7-daab-468c-8399-93d3a8f26394}*SharedItemsImports = 13
+		submodules\bfilesdk-dotnet\common\BFileSDK-Dotnet\BFileSDK-Dotnet.projitems*{f286b3e7-daab-468c-8399-93d3a8f26394}*SharedItemsImports = 13
 		Submodules\BDotNetFramework\Utilities\ServiceUtilities_PubSub_DB_Users\ServiceUtilities_PubSub_DB_Users.projitems*{f87b8c2b-ad95-4c42-8d8e-df69483a6139}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
