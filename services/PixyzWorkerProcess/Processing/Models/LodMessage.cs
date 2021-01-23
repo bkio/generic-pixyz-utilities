@@ -1,15 +1,12 @@
 ﻿using Newtonsoft.Json;
 using ServiceUtilities.Process.RandomAccessFile;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PixyzWorkerProcess.Processing.Models
 {
-    public class LodMessage:GeometryNode
+    public class LodMessage : GeometryNode
     {
-        public const string LODS_PROPERTY = "lodNumber";
-        [JsonProperty(LODS_PROPERTY)]
+        public const string LOD_NUMBER_PROPERTY = "lodNumber";
+        [JsonProperty(LOD_NUMBER_PROPERTY)]
         public int LodNumber { get; set; }
     }
 }
