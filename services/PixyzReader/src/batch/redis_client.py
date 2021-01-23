@@ -1,5 +1,6 @@
 import redis
 import base64
+import zlib
 import time
 import json
 import sys
@@ -35,6 +36,10 @@ class RedisClient:
     def GetLock(self):
         return self.thread_lock
 
+    def DeflateEncodeBase64(self, message):
+        compressed_message = zlib.compress(bytes(message, 'utf-8'))[2:-4]
+        return base64.b64encode(compressed_message)
+
     def Publish(self, message):
         """ 
         Publish string message to specified channel
@@ -50,11 +55,8 @@ class RedisClient:
         retryCount = 0
         while retryCount < 10 :
             try:
-                # base64 message sending
-                # message_bytes = message.encode()
-                # base64_bytes = base64.b64encode(message_bytes)
-                # self.redis_instance.publish(self.channel, base64_bytes)
-                self.redis_instance.publish(self.channel, message)
+                base64_message = self.DeflateEncodeBase64(message)
+                self.redis_instance.publish(self.channel, base64_message)
                 retryCount = 10
             except Exception as e:
                 self.logger.Error(f"=////=> Redis publish error: {e} -  message to be published: {message}")
