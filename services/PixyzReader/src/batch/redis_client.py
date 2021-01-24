@@ -75,7 +75,7 @@ class RedisClient:
         """
         self.channel = channel
 
-    def PublishData(self, data, verbose = False):
+    def PublishData(self, data, verbose = True):
         """ 
         Publish json object to specified channel\n
 
@@ -88,7 +88,7 @@ class RedisClient:
         message = json.dumps(data)
         message_size = sys.getsizeof(message)
         if verbose:
-            self.logger.MessageInfo(data, message_size)
+            self.logger.PrintMessageInfo(data, message_size, self.message_count)
         self.Publish(message)
 
     def Done(self):
@@ -99,8 +99,7 @@ class RedisClient:
             - void\n
         """
         data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': None, 'done': True, 'messageCount' : self.message_count }
-        message = json.dumps(data)
-        self.Publish(message)
+        self.PublishData(data)
 
     def Error(self, error_messages = []):
         """ 
@@ -113,8 +112,7 @@ class RedisClient:
             - void\n
         """
         data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': error_messages, 'done': True, 'messageCount' : self.message_count }
-        message = json.dumps(data)
-        self.Publish(message)
+        self.PublishData(data)
 
     def __GetRedisInstance(self):
         """ 

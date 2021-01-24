@@ -33,29 +33,39 @@ class Logger:
         core.addSessionLogFileVerbose(2)
         core.addConsoleVerbose(2)
     
-    def MessageInfo(self, data, message_size):
+    def PrintMessageInfo(self, data, message_size, message_count):
         total_vertexNormalTangentList = 0
         total_indexes = 0
-        
+
+
+        done = data['done']
+        errors = data['errors']
+        error_count = 0
+        if errors is not None:
+            error_count = len(errors)
+
+        if done:
+            logging.warning(f"=====> Done message has been sent. \tMessageCount: {message_count} \tMessageSize: {message_size} \tErrorCount: {error_count}")
         try:
             geometryNode = data['geometryNode']
-            lod = geometryNode['lods'][0]
-            lod_level = geometryNode['lodNumber']
+            if geometryNode is not None:
+                lod = geometryNode['lods'][0]
+                lod_level = geometryNode['lodNumber']
 
-            total_vertexNormalTangentList += len(lod['vertexNormalTangentList'])
-            total_indexes += len(lod['indexes'])
-            
-            logging.warning(f"=====> Sent message length = {message_size}. LOD{lod_level} indices:{total_indexes}, vertices:{total_vertexNormalTangentList}.")
+                total_vertexNormalTangentList += len(lod['vertexNormalTangentList'])
+                total_indexes += len(lod['indexes'])
+                
+                logging.warning(f"=====> Message has been sent. \tMessageCount: {message_count} \tMessageSize: {message_size} \tErrorCount: {error_count}. \tLOD{lod_level} \tIndices: {total_indexes} \tVertices: {total_vertexNormalTangentList}")
         except Exception as e:
-            logging.warning(f"=====> Sent message length = {message_size} without any geometry node.")
+            logging.warning(f"=====> Message has been sent. \tMessageCount: {message_count} \tMessageSize: {message_size} \tErrorCount: {error_count}. \t*** No LOD information")
 
-    def OccurrenceInfo(self, occurrences):
+    def PrintOccurrenceInfo(self, occurrences):
         n_triangles = scene.getPolygonCount(occurrences, True, False, False)
         n_vertices = scene.getVertexCount(occurrences, False, False, False)
-        logging.warning(f"=====> Model info step {self.message} = triangles:{n_triangles}, vertices:{n_vertices}")
+        logging.warning(f"=====> Occurrence Info \t{self.message} \t\t-> Triangles: {n_triangles} \tVertices: {n_vertices}")
 
-    def ModelInfo(self, root):
+    def PrintModelInfo(self, root):
         n_triangles = scene.getPolygonCount([root], True, False, False)
         n_vertices = scene.getVertexCount([root], False, False, False)
         n_parts = len(scene.getPartOccurrences(root))
-        logging.warning(f"=====> Model info step {self.message} = triangles:{n_triangles}, vertices:{n_vertices}, parts:{n_parts}.")
+        logging.warning(f"=====> Model Info \t{self.message} \t\t-> Triangles: {n_triangles} \tVertices: {n_vertices} \tParts: {n_parts}")
