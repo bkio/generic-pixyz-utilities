@@ -28,7 +28,7 @@ def StartModelProcess(_logger):
     system_error_message = None
 
     model_id = str(random.getrandbits(64))
-    _RedisClient = RedisClient(model_id, channel="models", host="127.0.0.1", port=6379, password="Kongsberg.,2021")
+    _RedisClient = RedisClient(model_id, channel="models", host="127.0.0.1", port=6379)
 
     # Download Files
     #system_error_message = DownloadFiles(file_url=SIGNED_FILE_URL, file_download_path="/app/file.zip").Run()
@@ -42,17 +42,7 @@ def StartModelProcess(_logger):
         #system_error_message = ImportFiles(models_folder_path="/app/models", zip_main_assembly_file_name_if_any=ZIP_MAIN_ASSEMBLY_FILE_NAME_IF_ANY).Run()
 
         files_with_path = []
-        #files_with_path.append("C:/models/rvm/M22-EY.rvm")
-        #files_with_path.append("C:/models/rvm/M22-EP.rvm")
-        #files_with_path.append("C:/models/gltf/model2.gltf")
-        #files_with_path.append("C:/models/fbx/model2.fbx")
-        #files_with_path.append("C:/tmp/models/rvm/O10-EP.rvm")
-        files_with_path.append("C:/tmp/models/fbx/UI-18-8101.fbx")
-        #files_with_path.append("C:/tmp/models/fbx/UI-18-8201.fbx")
-        #files_with_path.append("C:/tmp/models/fbx/UI-18-8101.fbx")
-        #files_with_path.append("C:/tmp/models/fbx/UI-18-8101.fbx")
-        #files_with_path.append("C:/tmp/models/fbx/model2.fbx")
-        #files_with_path.append("C:/models/monkey.dae")
+        files_with_path.append("C:/tmp/models/fbx/model2.fbx")
 
         system_error_message = ImportFileList(files_with_path).Run()
 
