@@ -40,26 +40,34 @@ class RedisClient:
         compressed_message = zlib.compress(bytes(message, 'utf-8'))[2:-4]
         return base64.b64encode(compressed_message)
 
-    def Publish(self, message):
+    def Publish(self, data, verbose = True):
         """ 
-        Publish string message to specified channel
+        Publish json data to specified channel
 
         - Parameters:\n
-            - message : Message to be sent\n
+            - data : Data to be sent as a message\n
+            - verbose : If True, it will write a message information\n
 
         - Returns:\n
             - void\n
         """
         self.message_count = self.message_count + 1
 
+        
+        message = json.dumps(data)
+        base64_message = self.DeflateEncodeBase64(message)
+
+        message_size = sys.getsizeof(base64_message)
+        if verbose:
+            self.logger.PrintMessageInfo(data, message_size, self.message_count)
+
         retryCount = 0
         while retryCount < 10 :
             try:
-                base64_message = self.DeflateEncodeBase64(message)
                 self.redis_instance.publish(self.channel, base64_message)
                 retryCount = 10
             except Exception as e:
-                self.logger.Error(f"=////=> Redis publish error: {e} -  message to be published: {message}")
+                self.logger.Error(f"=////=> Redis publish retry count: {retryCount} - error: {e} -  message to be published: {message}")
                 retryCount = retryCount + 1
                 time.sleep(1)
 
@@ -75,22 +83,6 @@ class RedisClient:
         """
         self.channel = channel
 
-    def PublishData(self, data, verbose = True):
-        """ 
-        Publish json object to specified channel\n
-
-        - Parameters:\n
-            - data : Data to serialize to string and publish\n
-
-        - Returns:\n
-            - void\n
-        """
-        message = json.dumps(data)
-        message_size = sys.getsizeof(message)
-        if verbose:
-            self.logger.PrintMessageInfo(data, message_size, self.message_count)
-        self.Publish(message)
-
     def Done(self):
         """ 
         Publish specific done message for listeners\n
@@ -99,7 +91,7 @@ class RedisClient:
             - void\n
         """
         data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': None, 'done': True, 'messageCount' : self.message_count }
-        self.PublishData(data)
+        self.Publish(data)
 
     def Error(self, error_messages = []):
         """ 
@@ -112,7 +104,7 @@ class RedisClient:
             - void\n
         """
         data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': error_messages, 'done': True, 'messageCount' : self.message_count }
-        self.PublishData(data)
+        self.Publish(data)
 
     def __GetRedisInstance(self):
         """ 

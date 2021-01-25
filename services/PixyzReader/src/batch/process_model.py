@@ -94,14 +94,15 @@ class ProcessModel:
         geometryNodeArray, error_messages = GeometryNode(thread_lock, occurrence, self.decimate_target_strategy, self.lod_levels, self.small_object_threshold, self.scale_factor).Get()
 
         for geometryNode in geometryNodeArray:
+            lodNumber = geometryNode["lodNumber"]
             geometryNodeModified = {}
             geometryNodeModified["id"] = geometryNode["id"]
-            geometryNodeModified["lodNumber"] = geometryNode["lodNumber"]
+            geometryNodeModified["lodNumber"] = lodNumber
             geometryNodeModified["lods"] = [ geometryNode["lod"] ]
 
-            if int(geometryNode["lodNumber"]) == 0:
+            if int(lodNumber) == 0:
                 data = {'model_id': model_id, 'hierarchyNode': hierarchyNode, 'metadataNode': metadataNode, 'geometryNode': geometryNodeModified, 'errors': error_messages, 'done': False }
-                self.redis_client.PublishData(data)
+                self.redis_client.Publish(data)
             else:
                 data = {'model_id': model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': geometryNodeModified, 'errors': error_messages, 'done': False }
-                self.redis_client.PublishData(data)
+                self.redis_client.Publish(data)

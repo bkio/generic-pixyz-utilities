@@ -37,7 +37,6 @@ class Logger:
         total_vertexNormalTangentList = 0
         total_indexes = 0
 
-
         done = data['done']
         errors = data['errors']
         error_count = 0
@@ -51,21 +50,22 @@ class Logger:
             if geometryNode is not None:
                 lod = geometryNode['lods'][0]
                 lod_level = geometryNode['lodNumber']
+                id = geometryNode['id']
 
                 total_vertexNormalTangentList += len(lod['vertexNormalTangentList'])
                 total_indexes += len(lod['indexes'])
                 
-                logging.warning(f"=====> Message has been sent. \tMessageCount: {message_count} \tMessageSize: {message_size} \tErrorCount: {error_count}. \tLOD{lod_level} \tIndices: {total_indexes} \tVertices: {total_vertexNormalTangentList}")
+                logging.warning(f"=====> Message has been sent. \tMessageCount: {message_count} \tMessageSize: {message_size} \tErrorCount: {error_count}. \tID:{id} \tLOD{lod_level} \tIndices: {total_indexes} \tVertices: {total_vertexNormalTangentList}")
         except Exception as e:
             logging.warning(f"=====> Message has been sent. \tMessageCount: {message_count} \tMessageSize: {message_size} \tErrorCount: {error_count}. \t*** No LOD information")
 
     def PrintOccurrenceInfo(self, occurrences):
         n_triangles = scene.getPolygonCount(occurrences, True, False, False)
         n_vertices = scene.getVertexCount(occurrences, False, False, False)
-        logging.warning(f"=====> Occurrence Info \t{self.message} \t\t-> Triangles: {n_triangles} \tVertices: {n_vertices}")
+        logging.warning(f"=====> Occurrence Info \t{self.message} \t-> Triangles: {n_triangles} \tVertices: {n_vertices}")
 
     def PrintModelInfo(self, root):
         n_triangles = scene.getPolygonCount([root], True, False, False)
         n_vertices = scene.getVertexCount([root], False, False, False)
         n_parts = len(scene.getPartOccurrences(root))
-        logging.warning(f"=====> Model Info \t{self.message} \t\t-> Triangles: {n_triangles} \tVertices: {n_vertices} \tParts: {n_parts}")
+        logging.warning(f"=====> Model Info \t{self.message} \t-> Triangles: {n_triangles} \tVertices: {n_vertices} \tParts: {n_parts}")

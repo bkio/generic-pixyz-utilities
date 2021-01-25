@@ -42,7 +42,7 @@ def StartModelProcess(_logger):
         #system_error_message = ImportFiles(models_folder_path="/app/models", zip_main_assembly_file_name_if_any=ZIP_MAIN_ASSEMBLY_FILE_NAME_IF_ANY).Run()
 
         files_with_path = []
-        files_with_path.append("C:/tmp/models/fbx/model2.fbx")
+        files_with_path.append("C:/tmp/models/fbx/UI-18-8101.fbx")
 
         system_error_message = ImportFileList(files_with_path).Run()
 
@@ -54,13 +54,13 @@ def StartModelProcess(_logger):
         _Algo.DeletePatches()
         _Algo.DeleteLines()
         _Algo.DeleteFreeVertices()
+        _Algo.MakeInstanceUnique()
         _Algo.Triangularize()
         _Algo.CreateNormals()
-        _Algo.MakeInstanceUnique()
         # _Algo.CreateInstancesBySimilarity()
         # _Algo.Decimate()
 
-        _ModelProcess = ProcessModel(model_id, _RedisClient, number_of_thread = 10, decimate_target_strategy="ratio", lod_levels=[100, 90, 80, 60, 20, 10], small_object_threshold=0, scale_factor=1000)
+        _ModelProcess = ProcessModel(model_id, _RedisClient, number_of_thread = 20, decimate_target_strategy="ratio", lod_levels=[100, 90, 80, 60, 20, 10], small_object_threshold=0, scale_factor=1000)
         _ModelProcess.AddCustomInformation("hierarchy_id", str(random.getrandbits(64)))
         _ModelProcess.Start()
     else:

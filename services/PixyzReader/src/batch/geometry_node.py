@@ -1,4 +1,5 @@
 import math
+from .utils import Utils
 from .geometry_mesh import GeometryMesh
 from .pixyz_algorithms import PixyzAlgorithms
 from .logger import Logger
@@ -65,6 +66,9 @@ class GeometryNode:
     def __IsPrototypePart(self):
         partOccurrenceList = scene.getPartOccurrences(scene.getRoot())
         prototype = scene.getPrototype(self.occurrence)
+
+        # if Utils().BisectSearch(partOccurrenceList, self.occurrence) and prototype == 0:
+        #     return True
         for item in partOccurrenceList:
             if item == self.occurrence and prototype == 0:
                 return True

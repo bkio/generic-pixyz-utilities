@@ -323,10 +323,9 @@ namespace PixyzWorkerProcess.Processing
 
         private static void MergeGeometry(ConcurrentDictionary<ulong, LodMessage> _GeometryStore, LodMessage NewMessage)
         {
-
                 _GeometryStore.AddOrUpdate(NewMessage.UniqueID, NewMessage, (K, V) =>
                 {
-                    V.LODs.AddRange(NewMessage.LODs);
+                    V.LODs.Add(NewMessage.LODs[0]);
                     return V;
                 });
             

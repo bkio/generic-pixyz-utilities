@@ -1,3 +1,4 @@
+from .utils import Utils
 from .matrix4x4 import Matrix4x4
 from .vector3 import Vector3
 from .color3 import Color3
@@ -45,6 +46,7 @@ class GeometryParts:
 
     def __IsPartOccurrence(self, occurrence):
         partOccurrenceList = scene.getPartOccurrences(scene.getRoot())
+        # return Utils().BisectSearch(partOccurrenceList, occurrence)
         for item in partOccurrenceList:
             if item == occurrence:
                 return True
