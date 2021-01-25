@@ -298,6 +298,7 @@ namespace PixyzWorkerProcess.Processing
                     byte[] MessageBytes = Convert.FromBase64String(Json);
                     MemoryStream InputStream = new MemoryStream(MessageBytes);
                     MemoryStream OutputStream = new MemoryStream();
+
                     using (DeflateStream decompressionStream = new DeflateStream(InputStream, CompressionMode.Decompress))
                     {
                         decompressionStream.CopyTo(OutputStream);
@@ -325,7 +326,14 @@ namespace PixyzWorkerProcess.Processing
         {
                 _GeometryStore.AddOrUpdate(NewMessage.UniqueID, NewMessage, (K, V) =>
                 {
-                    V.LODs.Add(NewMessage.LODs[0]);
+                    for (int i = 0; i < NewMessage.LODs.Count; ++i)
+                    {
+                        if (NewMessage.LODs[i] != null)
+                        {
+                            V.LODs.Add(NewMessage.LODs[i]);
+                        }
+                    }
+                    //V.LODs.Add(NewMessage.LODs[0]);
                     return V;
                 });
             
@@ -354,6 +362,10 @@ namespace PixyzWorkerProcess.Processing
 
                 if (Message.HierarchyNode != null)
                 {
+                    if(Message.HierarchyNode.ParentID == Message.HierarchyNode.UniqueID)
+                    {
+                        Message.HierarchyNode.ParentID = Node.UNDEFINED_ID;
+                    }
                     AddItemToQueues(Message.HierarchyNode, MessageCompressCopy.HierarchyNode);
                 }
 
@@ -383,18 +395,24 @@ namespace PixyzWorkerProcess.Processing
             //Check if Expected message count has been set
             if (ExpectedMessageCount != -1 && QueuedMessageCount >= ExpectedMessageCount)
             {
-                _ErrorMessageAction?.Invoke($"Received End signal for {ExpectedMessageCount} messages");
-                CompleteMerge(GeometryNodeToAssemblePlain);
-                CompleteMerge(GeometryNodeToAssembleCompressed);
-
-                foreach(var Node in GeometryNodeToAssemblePlain)
+                lock (LockObject)
                 {
-                    //There should exist a copy of each message
-                    LodMessage Copy = GeometryNodeToAssembleCompressed[Node.Key];
-                    AddItemToQueues(Node.Value, Copy);
-                }
+                    if (!QueueComplete)
+                    {
+                        _ErrorMessageAction?.Invoke($"Received End signal for {ExpectedMessageCount} messages");
+                        CompleteMerge(GeometryNodeToAssemblePlain);
+                        CompleteMerge(GeometryNodeToAssembleCompressed);
 
-                SignalQueuingComplete();
+                        foreach (var Node in GeometryNodeToAssemblePlain)
+                        {
+                            //There should exist a copy of each message
+                            LodMessage Copy = GeometryNodeToAssembleCompressed[Node.Key];
+                            AddItemToQueues(Node.Value, Copy);
+                        }
+
+                        SignalQueuingComplete();
+                    }
+                }
             }
         }
 
