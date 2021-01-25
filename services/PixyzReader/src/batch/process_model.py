@@ -67,7 +67,6 @@ class ProcessModel:
     def CreateWorkerItems(self, occurrence, parent_id):
         worker = {}
         worker['occurrence'] = occurrence
-        worker['model_id'] = self.model_id
         worker['parent_id'] = parent_id
         self.workerItems.append(worker)
         
@@ -79,7 +78,6 @@ class ProcessModel:
 
     def GetItemDetails(self, item):
         occurrence = item['occurrence']
-        model_id = item['model_id']
         parent_id = item['parent_id']
 
         metadata_id = str(random.getrandbits(64))
@@ -101,8 +99,12 @@ class ProcessModel:
             geometryNodeModified["lods"] = [ geometryNode["lod"] ]
 
             if int(lodNumber) == 0:
-                data = {'model_id': model_id, 'hierarchyNode': hierarchyNode, 'metadataNode': metadataNode, 'geometryNode': geometryNodeModified, 'errors': error_messages, 'done': False }
+                data = {'model_id': self.model_id, 'hierarchyNode': hierarchyNode, 'metadataNode': metadataNode, 'geometryNode': geometryNodeModified, 'errors': error_messages, 'done': False }
                 self.redis_client.Publish(data)
             else:
-                data = {'model_id': model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': geometryNodeModified, 'errors': error_messages, 'done': False }
+                data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': geometryNodeModified, 'errors': error_messages, 'done': False }
                 self.redis_client.Publish(data)
+
+        if len(geometryNodeArray) == 0:
+            data = {'model_id': self.model_id, 'hierarchyNode': hierarchyNode, 'metadataNode': metadataNode, 'geometryNode': None, 'errors': error_messages, 'done': False }
+            self.redis_client.Publish(data)

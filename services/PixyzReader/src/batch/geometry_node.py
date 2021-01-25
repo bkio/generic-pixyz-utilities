@@ -27,21 +27,30 @@ class GeometryNode:
         if self.__IsPrototypePart() == True:
             occurrence_id = core.getProperty(self.occurrence, "Id")
             part = scene.getComponent(self.occurrence, scene.ComponentType.Part, False)
+            targetTriangleCounts = []
 
             if len(self.lod_levels) <= 0:
                 self.lod_levels = [100]
 
+            if self.decimate_target_strategy == "ratio":
+                for current_lod in range(len(self.lod_levels)):
+                    triangle_count = scene.getPolygonCount([self.occurrence], True, False, False)
+                    decimate_value = triangle_count
+                    if current_lod > 0:
+                        decimate_value = int(math.floor(triangle_count * (lod_levels[current_lod] / 100)))
+                    targetTriangleCounts.append(decimate_value)
+
             for current_lod in range(len(self.lod_levels)):
                 try:
                     if current_lod > 0:
-                        # if target_strategy == triangleCount: use that value directly, otherwise convert to ratio
+                        # if target_strategy == triangleCount: use that value directly, otherwise convert to ratio based calculation
                         decimate_value = self.lod_levels[current_lod]
 
                         if self.decimate_target_strategy == "ratio":
-                            decimate_value = math.floor((self.lod_levels[current_lod] / self.lod_levels[current_lod-1]) * 100)
+                            decimate_value = targetTriangleCounts[current_lod]
 
                         self.thread_lock.acquire()
-                        PixyzAlgorithms().DecimateTarget([self.occurrence], [self.decimate_target_strategy, decimate_value])
+                        PixyzAlgorithms(verbose=False).DecimateTarget([self.occurrence], ["triangleCount", decimate_value])
                         self.thread_lock.release()
                 except Exception as e:
                     Logger().Error(f"=====> LOD Decimate Error, LOD{current_lod} -TargetStrategy: {self.decimate_target_strategy} -Error: {e}")
