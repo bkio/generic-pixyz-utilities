@@ -60,7 +60,7 @@ def StartModelProcess(_logger):
         # PixyzAlgorithms(verbose=True).Decimate()
 
         _ModelProcess = ProcessModel(model_id, _RedisClient, number_of_thread = 20, decimate_target_strategy="ratio", lod_levels=[100, 90, 80, 60, 20, 10], small_object_threshold=0, scale_factor=1000)
-        _ModelProcess.AddCustomInformation("hierarchy_id", str(random.getrandbits(64)))
+        _ModelProcess.AddCustomInformation("hierarchy_id", None, True)
         _ModelProcess.Start()
     else:
         _RedisClient.Error([system_error_message])
