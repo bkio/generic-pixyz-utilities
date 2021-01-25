@@ -33,10 +33,11 @@ class ProcessModel:
         self.ApplyCustomInformations(self.root)
         self.CreateThreadPool()
 
-    def AddCustomInformation(self, key, value):
+    def AddCustomInformation(self, key, value, random):
         customInfo = {}
         customInfo["key"] = key
         customInfo["value"] = value
+        customInfo["random"] = random
         self.custom_informations.append(customInfo)
 
     def ClearCustomInformation(self):
@@ -44,7 +45,10 @@ class ProcessModel:
 
     def ApplyCustomInformations(self, occurrence):
         for custom_info in self.custom_informations:
-            core.addCustomProperty(occurrence, custom_info["key"], custom_info["value"])
+            custom_value = custom_info["value"]
+            if custom_info["random"] == True:
+                custom_value = str(random.getrandbits(64))
+            core.addCustomProperty(occurrence, custom_info["key"], custom_value)
 
         for child in scene.getChildren(occurrence):
             self.ApplyCustomInformations(child)
