@@ -400,7 +400,7 @@ namespace PixyzWorkerProcess.Processing
 
         private string CompleteWrites(Action<string> _ErrorMessageAction = null)
         {
-            _ErrorMessageAction?.Invoke("Uploading files");
+            _ErrorMessageAction?.Invoke("Writing files");
 
             try
             {

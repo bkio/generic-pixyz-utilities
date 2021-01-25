@@ -21,8 +21,9 @@ class PixyzAlgorithms():
     """ 
     The wrapper class for describing Pixyz Algorithms for better documentation
     """
-    def __init__(self):
+    def __init__(self, verbose = False):
         self.root = scene.getRoot()
+        self.verbose = verbose
 
     def RepairCAD(self, occurrences = [], tolerance = 0.1, orient = False):
         """ 
@@ -36,7 +37,8 @@ class PixyzAlgorithms():
         - Returns:\n
             - void\n
         """
-        Logger('before repairCAD').PrintModelInfo(self.root)
+        if self.verbose:
+            Logger('before repairCAD').PrintModelInfo(self.root)
         
         if len(occurrences) == 0:
             occurrences = [self.root]
@@ -65,7 +67,8 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        Logger('before tessellate').PrintModelInfo(self.root)
+        if self.verbose:
+            Logger('before tessellate').PrintModelInfo(self.root)
 
         if len(occurrences) == 0:
             occurrences = [self.root]
@@ -86,7 +89,8 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        Logger('before repairMesh').PrintModelInfo(self.root)
+        if self.verbose:
+            Logger('before repairMesh').PrintModelInfo(self.root)
 
         if len(occurrences) == 0:
             occurrences = [self.root]
@@ -104,7 +108,8 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        Logger('before explodePartByMaterials').PrintModelInfo(self.root)
+        if self.verbose:
+            Logger('before explodePartByMaterials').PrintModelInfo(self.root)
 
         if len(occurrences) == 0:
             occurrences = [self.root]
@@ -123,7 +128,8 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        Logger('before deletePatches').PrintModelInfo(self.root)
+        if self.verbose:
+            Logger('before deletePatches').PrintModelInfo(self.root)
 
         if len(occurrences) == 0:
             occurrences = [self.root]
@@ -141,7 +147,8 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        Logger('before deleteLines').PrintModelInfo(self.root)
+        if self.verbose:
+            Logger('before deleteLines').PrintModelInfo(self.root)
 
         if len(occurrences) == 0:
             occurrences = [self.root]
@@ -159,7 +166,8 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        Logger('before deleteFreeVertices').PrintModelInfo(self.root)
+        if self.verbose:
+            Logger('before deleteFreeVertices').PrintModelInfo(self.root)
 
         if len(occurrences) == 0:
             occurrences = [self.root]
@@ -177,7 +185,8 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        Logger('before triangularize').PrintModelInfo(self.root)
+        if self.verbose:
+            Logger('before triangularize').PrintModelInfo(self.root)
 
         if len(occurrences) == 0:
             occurrences = [self.root]
@@ -198,7 +207,8 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        Logger('before createNormals').PrintModelInfo(self.root)
+        if self.verbose:
+            Logger('before createNormals').PrintModelInfo(self.root)
 
         if len(occurrences) == 0:
             occurrences = [self.root]
@@ -216,7 +226,8 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        Logger('before makeInstanceUnique').PrintModelInfo(self.root)
+        if self.verbose:
+            Logger('before makeInstanceUnique').PrintModelInfo(self.root)
 
         if len(occurrences) == 0:
             occurrences = [self.root]
@@ -242,7 +253,8 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        Logger('before createInstancesBySimilarity').PrintModelInfo(self.root)
+        if self.verbose:
+            Logger('before createInstancesBySimilarity').PrintModelInfo(self.root)
 
         if len(occurrences) == 0:
             occurrences = [self.root]
@@ -266,7 +278,8 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        Logger('before decimate').PrintModelInfo(self.root)
+        if self.verbose:
+            Logger('before decimate').PrintModelInfo(self.root)
 
         if len(occurrences) == 0:
             occurrences = [self.root]
@@ -288,7 +301,8 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        Logger('before decimate').PrintModelInfo(self.root)
+        if self.verbose:
+            Logger('before decimate').PrintModelInfo(self.root)
 
         if len(occurrences) == 0:
             occurrences = [self.root]
@@ -310,7 +324,8 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        Logger('before decimate').PrintModelInfo(self.root)
+        if self.verbose:
+            Logger('before decimate').PrintModelInfo(self.root)
 
         if len(occurrences) == 0:
             occurrences = [self.root]
@@ -332,7 +347,8 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        Logger('before decimate').PrintModelInfo(self.root)
+        if self.verbose:
+            Logger('before decimate').PrintModelInfo(self.root)
 
         if len(occurrences) == 0:
             occurrences = [self.root]
