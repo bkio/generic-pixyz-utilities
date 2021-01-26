@@ -46,11 +46,7 @@ class GeometryParts:
 
     def __IsPartOccurrence(self, occurrence):
         partOccurrenceList = scene.getPartOccurrences(scene.getRoot())
-        # return Utils().BisectSearch(partOccurrenceList, occurrence)
-        for item in partOccurrenceList:
-            if item == occurrence:
-                return True
-        return False
+        return Utils().BisectSearch(partOccurrenceList, occurrence)
     
     def Get(self):
         return self.geometry_parts

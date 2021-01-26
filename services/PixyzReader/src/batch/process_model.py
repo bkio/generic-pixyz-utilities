@@ -104,11 +104,11 @@ class ProcessModel:
 
             if int(lodNumber) == 0:
                 data = {'model_id': self.model_id, 'hierarchyNode': hierarchyNode, 'metadataNode': metadataNode, 'geometryNode': geometryNodeModified, 'errors': error_messages, 'done': False }
-                self.redis_client.Publish(data)
+                self.redis_client.Publish(data, verbose=False)
             else:
                 data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': geometryNodeModified, 'errors': error_messages, 'done': False }
-                self.redis_client.Publish(data)
+                self.redis_client.Publish(data, verbose=False)
 
         if len(geometryNodeArray) == 0:
             data = {'model_id': self.model_id, 'hierarchyNode': hierarchyNode, 'metadataNode': metadataNode, 'geometryNode': None, 'errors': error_messages, 'done': False }
-            self.redis_client.Publish(data)
+            self.redis_client.Publish(data, verbose=False)

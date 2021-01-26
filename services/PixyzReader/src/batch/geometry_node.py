@@ -76,12 +76,10 @@ class GeometryNode:
         partOccurrenceList = scene.getPartOccurrences(scene.getRoot())
         prototype = scene.getPrototype(self.occurrence)
 
-        # if Utils().BisectSearch(partOccurrenceList, self.occurrence) and prototype == 0:
-        #     return True
-        for item in partOccurrenceList:
-            if item == self.occurrence and prototype == 0:
-                return True
-        return False
-
+        if prototype == 0:
+            return Utils().BisectSearch(partOccurrenceList, self.occurrence)
+        else:
+            return False
+        
     def Get(self):
         return [self.geometry_nodes, self.error_messages]
