@@ -7,9 +7,8 @@ try:# Prevent IDE errors
 except: pass
 
 class GeometryMesh:
-    def __init__(self, lod_level, lod_mesh, small_object_threshold = 50, scale_factor = 1000):
+    def __init__(self, lod_mesh, small_object_threshold = 50, scale_factor = 1000):
         #Parameters
-        self.lod_level = lod_level
         self.lod_mesh = lod_mesh
         self.small_object_threshold = small_object_threshold
         self.scale_factor = scale_factor
@@ -65,39 +64,38 @@ class GeometryMesh:
         if self.small_object_threshold <= 0:
             return False
             
-        if self.lod_level > 0:
-            bbmax = {}
-            bbmax['x'] = -999999
-            bbmax['y'] = -999999
-            bbmax['z'] = -999999
+        bbmax = {}
+        bbmax['x'] = -999999
+        bbmax['y'] = -999999
+        bbmax['z'] = -999999
 
-            bbmin = {}
-            bbmin['x'] = 999999
-            bbmin['y'] = 999999
-            bbmin['z'] = 999999
+        bbmin = {}
+        bbmin['x'] = 999999
+        bbmin['y'] = 999999
+        bbmin['z'] = 999999
 
-            i = 0
-            while i < len(vertices):
-                if bbmax['x'] < vertices[i]['x']:
-                    bbmax['x'] = vertices[i]['x']
-                if bbmax['y'] < vertices[i]['y']:
-                    bbmax['y'] = vertices[i]['y']
-                if bbmax['z'] < vertices[i]['z']:
-                    bbmax['z'] = vertices[i]['z']
-                if bbmin['x'] > vertices[i]['x']:
-                    bbmin['x'] = vertices[i]['x']
-                if bbmin['y'] > vertices[i]['y']:
-                    bbmin['y'] = vertices[i]['y']
-                if bbmin['z'] > vertices[i]['z']:
-                    bbmin['z'] = vertices[i]['z']
-                i += 1
+        i = 0
+        while i < len(vertices):
+            if bbmax['x'] < vertices[i]['x']:
+                bbmax['x'] = vertices[i]['x']
+            if bbmax['y'] < vertices[i]['y']:
+                bbmax['y'] = vertices[i]['y']
+            if bbmax['z'] < vertices[i]['z']:
+                bbmax['z'] = vertices[i]['z']
+            if bbmin['x'] > vertices[i]['x']:
+                bbmin['x'] = vertices[i]['x']
+            if bbmin['y'] > vertices[i]['y']:
+                bbmin['y'] = vertices[i]['y']
+            if bbmin['z'] > vertices[i]['z']:
+                bbmin['z'] = vertices[i]['z']
+            i += 1
 
-            x = bbmax['x'] - bbmin['x']
-            y = bbmax['y'] - bbmin['y']
-            z = bbmax['z'] - bbmin['z']
+        x = bbmax['x'] - bbmin['x']
+        y = bbmax['y'] - bbmin['y']
+        z = bbmax['z'] - bbmin['z']
 
-            if x < self.small_object_threshold and y < self.small_object_threshold and z < self.small_object_threshold:
-                return True
+        if x < self.small_object_threshold and y < self.small_object_threshold and z < self.small_object_threshold:
+            return True
         
         return False
 

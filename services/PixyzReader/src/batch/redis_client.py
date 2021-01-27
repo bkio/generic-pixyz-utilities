@@ -34,7 +34,10 @@ class RedisClient:
         self.message_count = 0
 
     def GetLock(self):
-        return self.thread_lock
+        return self.thread_lock    
+
+    def GetMessageCount(self):
+        return self.message_count
 
     def DeflateEncodeBase64(self, message):
         compressed_message = zlib.compress(bytes(message, 'utf-8'))[2:-4]

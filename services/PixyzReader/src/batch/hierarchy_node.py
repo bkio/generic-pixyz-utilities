@@ -1,5 +1,6 @@
 from .geometry_parts import GeometryParts
 from .logger import Logger
+from .utils import Utils
 
 import pxz
 try:# Prevent IDE errors
@@ -8,11 +9,15 @@ try:# Prevent IDE errors
 except: pass
 
 class HierarchyNode:
-    def __init__(self, occurrence, parent_id, hierarchy_id, metadata_id, scale_factor = 1000):
+    def __init__(self, part_occurrences, occurrence, parent_id, hierarchy_id, metadata_id, scale_factor = 1000):
         self.parent_id = parent_id
         self.hierarchy_id = hierarchy_id
         self.metadata_id = metadata_id
-        self.geometryParts = GeometryParts(occurrence, scale_factor).Get()
+        
+        if Utils().BisectSearch(part_occurrences, occurrence):
+            self.geometryParts = GeometryParts(occurrence, scale_factor).Get()
+        else:
+            self.geometryParts = None
 
         self.childNodes = []
         for child in scene.getChildren(occurrence):

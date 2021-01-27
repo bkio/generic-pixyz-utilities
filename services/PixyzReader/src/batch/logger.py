@@ -70,5 +70,16 @@ class Logger:
     def PrintModelInfo(self, root):
         n_triangles = scene.getPolygonCount([root], True, False, False)
         n_vertices = scene.getVertexCount([root], False, False, False)
-        n_parts = len(scene.getPartOccurrences(root))
-        logging.warning(f"=====> Model Info \t{self.message} \t-> Triangles: {n_triangles} \tVertices: {n_vertices} \tParts: {n_parts}")
+        part_occurrences = scene.getPartOccurrences(root)
+        n_parts = len(part_occurrences)
+        n_prototypes = self.GetPrototypePartsCount(part_occurrences)
+        logging.warning(f"=====> Model Info \t{self.message} \t-> Triangles: {n_triangles} \tVertices: {n_vertices} \tGeometry Parts: {n_parts} \tUnique Geometry Parts: {n_prototypes}")
+
+    def GetPrototypePartsCount(self, part_occurrences):
+        prototypeCount = 0
+        for occurrence in part_occurrences:
+            prototype = scene.getPrototype(occurrence)
+            if prototype == 0:
+                prototypeCount += 1
+        
+        return prototypeCount

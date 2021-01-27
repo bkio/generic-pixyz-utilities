@@ -9,7 +9,6 @@ try:# Prevent IDE errors
     from pxz import generateproxy
     from pxz import material
     from pxz import polygonal
-    from pxz import scenario
 except: pass
 
 class UVGenerationMode(enum.Enum):
@@ -234,7 +233,7 @@ class PixyzAlgorithms():
 
         scene.makeInstanceUnique(occurrences)
 
-    def CreateInstancesBySimilarity(self, occurrences = [], dimensionsSimilarity = 1.0, polycountSimilarity = 1.0, ignoreSymmetry = True, keepExistingPrototypes = False, createNewOccurrencesForPrototypes = True):
+    def CreateInstancesBySimilarity(self, occurrences = [], dimensionsSimilarity = 0.999, polycountSimilarity = 0.999, ignoreSymmetry = True, keepExistingPrototypes = False, createNewOccurrencesForPrototypes = False):
         """
         Create instances when there are similar parts.\n
         This can be used to repair instances or to simplify a model that has similar parts that could be instanciated instead to reduce the number of unique meshes (reduces drawcalls, GPU memory usage and file size).\n
@@ -259,7 +258,7 @@ class PixyzAlgorithms():
         if len(occurrences) == 0:
             occurrences = [self.root]
 
-        scenario.createInstancesBySimilarity(occurrences, dimensionsSimilarity, polycountSimilarity, ignoreSymmetry, keepExistingPrototypes, createNewOccurrencesForPrototypes)
+        algo.createInstancesBySimilarity(occurrences, dimensionsSimilarity, polycountSimilarity, ignoreSymmetry, keepExistingPrototypes, createNewOccurrencesForPrototypes)
 
     def Decimate(self, occurrences = [], surfacicTolerance = 3.0, lineicTolerance = -1, normalTolerance = 15.0, texCoordTolerance = -1, releaseConstraintOnSmallArea = False):
         """
@@ -373,6 +372,13 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        # Logger(f"before decimateTarget - r:{targetStrategy[1]}").PrintOccurrenceInfo(occurrences)
+        if len(occurrences) == 0:
+            occurrences = [self.root]
+        
+        if self.verbose:
+            Logger(f"before decimateTarget - {targetStrategy[0]}:{targetStrategy[1]}").PrintModelInfo(self.root)
+        
         algo.decimateTarget(occurrences, targetStrategy, boundaryWeight, normalWeight, UVWeight, sharpNormalWeight, UVSeamWeight, forbidUVFoldovers, protectTopology)
-        # Logger(f"after decimateTarget - r:{targetStrategy[1]}").PrintOccurrenceInfo(occurrences)
+        
+        if self.verbose:
+            Logger(f"after decimateTarget - {targetStrategy[0]}:{targetStrategy[1]}").PrintModelInfo(self.root)

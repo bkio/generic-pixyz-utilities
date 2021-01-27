@@ -255,6 +255,10 @@ namespace PixyzWorkerProcess.Processing
             else
             {
                 State = CompleteWrites(LogError);
+                if (State == SUCCESS_STATE)
+                {
+                    _ErrorMessageAction?.Invoke("Files are successfully written.");
+                }
             }
 
             //Call out to cad process to let it know it can destroy the pod
