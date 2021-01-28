@@ -43,20 +43,21 @@ def StartModelProcess(_logger):
 
         files_with_path = []
         # files_with_path.append("C:/tmp/models/fbx/UI-18-8101.fbx")
-        files_with_path.append("C:/tmp/models/fbx/OLOverall.fbx")
-        # files_with_path.append("C:/tmp/models/fbx/AREAQB.fbx")
+        # files_with_path.append("C:/tmp/models/fbx/OLOverall.fbx")
+        files_with_path.append("C:/tmp/models/fbx/AREAQB.fbx")
 
         system_error_message = ImportFileList(files_with_path).Run()
 
-        PixyzAlgorithms(verbose=True).RepairCAD()
-        PixyzAlgorithms(verbose=True).Tesellate()
-        PixyzAlgorithms(verbose=True).RepairMesh()
+        Logger("before operation").PrintModelInfo()
+        # PixyzAlgorithms(verbose=True).RepairCAD()
+        # PixyzAlgorithms(verbose=True).Tesellate()
+        # PixyzAlgorithms(verbose=True).RepairMesh()
         # PixyzAlgorithms(verbose=True).ExplodePartByMaterials()
+        # PixyzAlgorithms(verbose=True).DeletePatches()
+        # PixyzAlgorithms(verbose=True).DeleteLines()
+        PixyzAlgorithms(verbose=True).DeleteFreeVertices()
         PixyzAlgorithms(verbose=True).MakeInstanceUnique()
         # PixyzAlgorithms(verbose=True).CreateInstancesBySimilarity()
-        PixyzAlgorithms(verbose=True).DeletePatches()
-        PixyzAlgorithms(verbose=True).DeleteLines()
-        PixyzAlgorithms(verbose=True).DeleteFreeVertices()
         PixyzAlgorithms(verbose=True).Triangularize()
         PixyzAlgorithms(verbose=True).CreateNormals()
 

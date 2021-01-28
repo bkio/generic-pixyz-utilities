@@ -36,13 +36,13 @@ class PixyzAlgorithms():
         - Returns:\n
             - void\n
         """
-        if self.verbose:
-            Logger('before repairCAD').PrintModelInfo(self.root)
-        
         if len(occurrences) == 0:
             occurrences = [self.root]
         
         algo.repairCAD(occurrences, tolerance, orient)
+        
+        if self.verbose:
+            Logger('after repairCAD').PrintModelInfo(self.root)
 
     def Tesellate(self, occurrences = [], maxSag = 2.0, maxLength = -1, maxAngle = -1, createNormals = True, uvMode = UVGenerationMode.NoUV.value, uvChannel = 1, uvPadding = 0.0, createTangents = True, createFreeEdges = False, keepBRepShape = False, overrideExistingTessellation = False):
         """
@@ -66,13 +66,13 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        if self.verbose:
-            Logger('before tessellate').PrintModelInfo(self.root)
-
         if len(occurrences) == 0:
             occurrences = [self.root]
 
         algo.tessellate(occurrences, maxSag, maxLength, maxAngle, createNormals, uvMode, uvChannel, uvPadding, createTangents, createFreeEdges, keepBRepShape, overrideExistingTessellation)
+        
+        if self.verbose:
+            Logger('after tessellate').PrintModelInfo(self.root)
 
     def RepairMesh(self, occurrences = [], tolerance = 0.1, crackNonManifold = True, orient = False):
         """
@@ -88,13 +88,13 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        if self.verbose:
-            Logger('before repairMesh').PrintModelInfo(self.root)
-
         if len(occurrences) == 0:
             occurrences = [self.root]
 
         algo.repairMesh(occurrences, tolerance, crackNonManifold, orient)
+        
+        if self.verbose:
+            Logger('after repairMesh').PrintModelInfo(self.root)
 
     def ExplodePartByMaterials(self, occurrences = []):
         """
@@ -107,13 +107,13 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        if self.verbose:
-            Logger('before explodePartByMaterials').PrintModelInfo(self.root)
-
         if len(occurrences) == 0:
             occurrences = [self.root]
 
         algo.explodePartByMaterials(occurrences)
+        
+        if self.verbose:
+            Logger('after explodePartByMaterials').PrintModelInfo(self.root)
 
     def DeletePatches(self, occurrences = [], keepOnePatchByMaterial = True):
         """
@@ -127,13 +127,13 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        if self.verbose:
-            Logger('before deletePatches').PrintModelInfo(self.root)
-
         if len(occurrences) == 0:
             occurrences = [self.root]
 
         algo.deletePatches(occurrences, keepOnePatchByMaterial)
+
+        if self.verbose:
+            Logger('after deletePatches').PrintModelInfo(self.root)
 
     def DeleteLines(self, occurrences = []):
         """
@@ -146,13 +146,13 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        if self.verbose:
-            Logger('before deleteLines').PrintModelInfo(self.root)
-
         if len(occurrences) == 0:
             occurrences = [self.root]
 
         algo.deleteLines(occurrences)
+
+        if self.verbose:
+            Logger('after deleteLines').PrintModelInfo(self.root)
 
     def DeleteFreeVertices(self, occurrences = []):
         """
@@ -165,13 +165,13 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        if self.verbose:
-            Logger('before deleteFreeVertices').PrintModelInfo(self.root)
-
         if len(occurrences) == 0:
             occurrences = [self.root]
 
         algo.deleteFreeVertices(occurrences)
+
+        if self.verbose:
+            Logger('after deleteFreeVertices').PrintModelInfo(self.root)
 
     def Triangularize(self, occurrences = []):
         """
@@ -184,13 +184,13 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        if self.verbose:
-            Logger('before triangularize').PrintModelInfo(self.root)
-
         if len(occurrences) == 0:
             occurrences = [self.root]
 
         algo.triangularize(occurrences)
+
+        if self.verbose:
+            Logger('after triangularize').PrintModelInfo(self.root)
 
     def CreateNormals(self, occurrences = [], sharpEdge = -1.0, override = True, useAreaWeighting = False):
         """
@@ -206,13 +206,13 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        if self.verbose:
-            Logger('before createNormals').PrintModelInfo(self.root)
-
         if len(occurrences) == 0:
             occurrences = [self.root]
 
         algo.createNormals(occurrences, sharpEdge, override, useAreaWeighting)
+        
+        if self.verbose:
+            Logger('after createNormals').PrintModelInfo(self.root)
 
     def MakeInstanceUnique(self, occurrences = []):
         """
@@ -225,13 +225,13 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        if self.verbose:
-            Logger('before makeInstanceUnique').PrintModelInfo(self.root)
-
         if len(occurrences) == 0:
             occurrences = [self.root]
 
         scene.makeInstanceUnique(occurrences)
+        
+        if self.verbose:
+            Logger('after makeInstanceUnique').PrintModelInfo(self.root)
 
     def CreateInstancesBySimilarity(self, occurrences = [], dimensionsSimilarity = 0.999, polycountSimilarity = 0.999, ignoreSymmetry = True, keepExistingPrototypes = False, createNewOccurrencesForPrototypes = False):
         """
@@ -252,13 +252,13 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        if self.verbose:
-            Logger('before createInstancesBySimilarity').PrintModelInfo(self.root)
-
         if len(occurrences) == 0:
             occurrences = [self.root]
 
         algo.createInstancesBySimilarity(occurrences, dimensionsSimilarity, polycountSimilarity, ignoreSymmetry, keepExistingPrototypes, createNewOccurrencesForPrototypes)
+
+        if self.verbose:
+            Logger('after createInstancesBySimilarity').PrintModelInfo(self.root)
 
     def Decimate(self, occurrences = [], surfacicTolerance = 3.0, lineicTolerance = -1, normalTolerance = 15.0, texCoordTolerance = -1, releaseConstraintOnSmallArea = False):
         """
@@ -277,13 +277,13 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        if self.verbose:
-            Logger('before decimate').PrintModelInfo(self.root)
-
         if len(occurrences) == 0:
             occurrences = [self.root]
 
         algo.decimate(occurrences, surfacicTolerance, lineicTolerance, normalTolerance, texCoordTolerance, releaseConstraintOnSmallArea)
+        
+        if self.verbose:
+            Logger('after decimate').PrintModelInfo(self.root)
     
     def DecimateMedium(self, occurrences = []):
         """
@@ -300,13 +300,13 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        if self.verbose:
-            Logger('before decimate').PrintModelInfo(self.root)
-
         if len(occurrences) == 0:
             occurrences = [self.root]
 
         self.Decimate(occurrences, 1.0, -1, 8.0, -1, False)
+        
+        if self.verbose:
+            Logger('after decimateMedium').PrintModelInfo(self.root)
 
     def DecimateLow(self, occurrences = []):
         """
@@ -323,13 +323,13 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        if self.verbose:
-            Logger('before decimate').PrintModelInfo(self.root)
-
         if len(occurrences) == 0:
             occurrences = [self.root]
 
         self.Decimate(occurrences, 0.5, 0.1, 1.0, -1, False)
+
+        if self.verbose:
+            Logger('after decimateLow').PrintModelInfo(self.root)
 
     def DecimateBest(self, occurrences = []):
         """
@@ -346,13 +346,13 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        if self.verbose:
-            Logger('before decimate').PrintModelInfo(self.root)
-
         if len(occurrences) == 0:
             occurrences = [self.root]
 
         self.Decimate(occurrences, 1.0, 0.1, 5.0, -1, False)
+        
+        if self.verbose:
+            Logger('after decimateBest').PrintModelInfo(self.root)
 
     def DecimateTarget(self, occurrences = [], targetStrategy = ["ratio", 75], boundaryWeight = 0.0, normalWeight = 1.0, UVWeight = 0.0, sharpNormalWeight = 0.0, UVSeamWeight = 0.0, forbidUVFoldovers = False, protectTopology = True):
         """

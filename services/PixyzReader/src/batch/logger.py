@@ -67,7 +67,10 @@ class Logger:
         n_vertices = scene.getVertexCount(occurrences, False, False, False)
         logging.warning(f"=====> Occurrence Info \t{self.message} \t-> Triangles: {n_triangles} \tVertices: {n_vertices}")
 
-    def PrintModelInfo(self, root):
+    def PrintModelInfo(self, root = None):
+        if root == None:
+            root = scene.getRoot() 
+            
         n_triangles = scene.getPolygonCount([root], True, False, False)
         n_vertices = scene.getVertexCount([root], False, False, False)
         part_occurrences = scene.getPartOccurrences(root)
