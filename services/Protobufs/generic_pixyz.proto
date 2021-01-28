@@ -1,0 +1,90 @@
+// See README.txt for information and build instructions.
+//
+// Note: START and END tags are used in comments to define sections used in
+// tutorials.  They are not part of the syntax for Protocol Buffers.
+//
+// To get an in-depth walkthrough of this file and the related examples, see:
+// https://developers.google.com/protocol-buffers/docs/tutorials
+
+// [START declaration]
+syntax = "proto3";
+package generic_pixyz_proto;
+// [END declaration]
+
+// [START csharp_declaration]
+option csharp_namespace = "PixyzWorkerProcess.Processing.Models";
+// [END csharp_declaration]
+
+// [START messages]
+message PColorRGB {
+  float R = 1;
+  float G = 2;
+  float B = 3;
+}
+
+message PColorRGBA {
+  float R = 1;
+  float G = 2;
+  float B = 3;
+  float A = 4;
+}
+
+message PVector2D {
+  float X = 1;
+  float Y = 2;
+}
+
+message PVector3D {
+  float X = 1;
+  float Y = 2;
+  float Z = 3;
+}
+
+message PVertexNormalTangent {
+  PVector3D Vertex = 1;
+  PVector3D Normal = 2;
+  PVector3D Tangent = 3;
+}
+
+message PLOD {
+  repeated PVertexNormalTangent VertexNormalTangentList = 1;
+  repeated uint32 Indexes = 2;
+}
+
+message PGeometryPart {
+  uint64 GeometryId = 1;
+  PVector3D Location = 2;
+  PVector3D Rotation = 3;
+  PVector3D Scale = 4;
+  PColorRGB Color = 5;
+}
+
+message PHierarchyNode {
+  uint64 UniqueID = 1;
+  uint64 ParentID = 2;
+  uint64 MetadataID = 3;
+  repeated PGeometryPart GeometryParts = 4;
+  repeated uint64 ChildNodes = 5;
+}
+
+message PMetadataNode {
+  uint64 UniqueID = 1;
+  string Metadata = 2;
+}
+
+message PGeometryNode {
+  uint64 UniqueID = 1;
+  uint32 LodNumber = 2;
+  repeated PLOD LODs = 3;
+}
+
+message PNodeMessage {
+  uint64 ModelID = 1;
+  repeated string Errors = 2;
+  PHierarchyNode HierarchyNode = 3;
+  PMetadataNode MetadataNode = 4;
+  PGeometryNode GeometryNode = 5;
+  bool Done = 6;
+  uint32 MessageCount = 7;
+}
+// [END messages]
