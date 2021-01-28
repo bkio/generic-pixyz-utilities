@@ -382,3 +382,42 @@ class PixyzAlgorithms():
         
         if self.verbose:
             Logger(f"after decimateTarget - {targetStrategy[0]}:{targetStrategy[1]}").PrintModelInfo(self.root)
+    
+    def MergePartsByAssemblies(self, occurrences = [], mergeHiddenPartsMode = 2):
+        """
+        Merge all parts under each assembly together
+
+        - Parameters: \n
+            - roots (OccurrenceList) [optional] : Roots occurrences for the process (will not be removed)\n
+            - mergeHiddenPartsMode (MergeHiddenPartsMode) [optional] : Hidden parts handling mode, Destroy them (0), make visible (1) or merge separately (2)\n
+        - Returns:\n
+            - void\n
+
+        """
+        if len(occurrences) == 0:
+            occurrences = [self.root]
+
+        scene.mergePartsByAssemblies([self.root], mergeHiddenPartsMode)
+
+        if self.verbose:
+            Logger(f"after mergePartsByAssemblies").PrintModelInfo(self.root)
+
+    def MergeFinalLevel(self, occurrences = [], mergeHiddenPartsMode = 2, collapseToParent = False):
+        """
+         Merge final level (occurrences with only occurrence with part component as children)
+
+        - Parameters: \n
+            - roots (OccurrenceList) [optional] : Roots occurrences for the process (will not be removed)\n
+            - mergeHiddenPartsMode (MergeHiddenPartsMode) [optional] : Hidden parts handling mode, Destroy them (0), make visible (1) or merge separately (2)\n
+            - collapseToParent (Boolean) [optional] : If true, final level unique merged part will replace it's parent\n
+        - Returns:\n
+            - void\n
+
+        """
+        if len(occurrences) == 0:
+            occurrences = [self.root]
+
+        scene.mergeFinalLevel([self.root], mergeHiddenPartsMode, collapseToParent)
+
+        if self.verbose:
+            Logger(f"after mergeFinalLevel").PrintModelInfo(self.root)

@@ -56,10 +56,13 @@ def StartModelProcess(_logger):
         # PixyzAlgorithms(verbose=True).DeletePatches()
         # PixyzAlgorithms(verbose=True).DeleteLines()
         PixyzAlgorithms(verbose=True).DeleteFreeVertices()
+        PixyzAlgorithms(verbose=True).MergePartsByAssemblies()
+        PixyzAlgorithms(verbose=True).MergeFinalLevel()
         PixyzAlgorithms(verbose=True).MakeInstanceUnique()
         # PixyzAlgorithms(verbose=True).CreateInstancesBySimilarity()
         PixyzAlgorithms(verbose=True).Triangularize()
         PixyzAlgorithms(verbose=True).CreateNormals()
+        PixyzAlgorithms(verbose=True).DecimateLow()
 
         _ModelProcess = ProcessModel(model_id, _RedisClient, number_of_thread = 20, decimate_target_strategy="ratio", lod_levels=[100, 90, 80, 60, 20, 10], small_object_threshold=0, scale_factor=1000)
         _ModelProcess.AddCustomInformation("hierarchy_id", None, True)
