@@ -34,6 +34,7 @@ class ProcessModel:
 
         self.part_occurrences = []
         self.prototype_parts = []
+        self.decimate_values = []
 
     def Start(self):
         Logger().Warning("=====> Model processing has been started, please wait processing...")
@@ -50,8 +51,10 @@ class ProcessModel:
                 decimate_value = current_lod
                 if self.decimate_target_strategy == "ratio":
                     decimate_value = math.ceil((self.lod_levels[current_lod]/self.lod_levels[current_lod-1]) * 100)
-                PixyzAlgorithms(verbose=True).DecimateTarget([], [self.decimate_target_strategy, decimate_value])
-            
+                self.decimate_values.append(decimate_value)
+                # PixyzAlgorithms(verbose=True).DecimateTarget([], [self.decimate_target_strategy, decimate_value])
+        
+        for current_lod in range(len(self.lod_levels)):
             if current_lod == 0:
                 self.CreateWorkerItems(self.root, '18446744069414584320')
             else:
@@ -148,7 +151,9 @@ class ProcessModel:
         geometryNode, error_messages = [None, None]
 
         if Utils().BisectSearch(self.prototype_parts, occurrence):
-            geometryNode, error_messages = GeometryNode(occurrence, small_obj_threshold, self.scale_factor).Get()
+            thread_lock = self.redis_client.GetLock()
+            current_decimate_value = self.decimate_values[lod_number]
+            geometryNode, error_messages = GeometryNode(thread_lock, occurrence, lod_number, self.decimate_target_strategy, current_decimate_value, small_obj_threshold, self.scale_factor).Get()
 
         if geometryNode != None:
             geometryNode["lodNumber"] = lod_number
