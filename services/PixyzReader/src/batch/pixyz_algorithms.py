@@ -304,9 +304,6 @@ class PixyzAlgorithms():
             occurrences = [self.root]
 
         self.Decimate(occurrences, 1.0, -1, 8.0, -1, False)
-        
-        if self.verbose:
-            Logger('after decimateMedium').PrintModelInfo(self.root)
 
     def DecimateLow(self, occurrences = []):
         """
@@ -328,9 +325,6 @@ class PixyzAlgorithms():
 
         self.Decimate(occurrences, 0.5, 0.1, 1.0, -1, False)
 
-        if self.verbose:
-            Logger('after decimateLow').PrintModelInfo(self.root)
-
     def DecimateBest(self, occurrences = []):
         """
         Reduce the polygon count by removing some vertices with best preset settings which means highest reduction but good quality\n
@@ -350,9 +344,6 @@ class PixyzAlgorithms():
             occurrences = [self.root]
 
         self.Decimate(occurrences, 1.0, 0.1, 5.0, -1, False)
-        
-        if self.verbose:
-            Logger('after decimateBest').PrintModelInfo(self.root)
 
     def DecimateTarget(self, occurrences = [], targetStrategy = ["ratio", 75], boundaryWeight = 0.0, normalWeight = 1.0, UVWeight = 0.0, sharpNormalWeight = 0.0, UVSeamWeight = 0.0, forbidUVFoldovers = False, protectTopology = True):
         """
