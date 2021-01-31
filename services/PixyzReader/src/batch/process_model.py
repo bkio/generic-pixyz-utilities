@@ -47,11 +47,12 @@ class ProcessModel:
             self.lod_levels = [100]
 
         for current_lod in range(len(self.lod_levels)):
+            decimate_value = current_lod
             if current_lod > 0:
-                decimate_value = current_lod
                 if self.decimate_target_strategy == "ratio":
                     decimate_value = math.ceil((self.lod_levels[current_lod]/self.lod_levels[current_lod-1]) * 100)
-                self.decimate_values.append(decimate_value)
+            
+            self.decimate_values.append(decimate_value)
                 # PixyzAlgorithms(verbose=True).DecimateTarget([], [self.decimate_target_strategy, decimate_value])
         
         for current_lod in range(len(self.lod_levels)):
