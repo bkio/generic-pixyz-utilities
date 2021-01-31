@@ -1,7 +1,7 @@
 from batch.pixyz_algorithms import PixyzAlgorithms
-from .utils import Utils
 from .geometry_mesh import GeometryMesh
 from .logger import Logger
+from .protobuf_messages_pb2 import *
 
 import pxz
 try:# Prevent IDE errors
@@ -36,11 +36,11 @@ class GeometryNode:
             Logger().Error(f"=====> GeometryMesh DecimateTarget Error {e}")
 
         try:
-            lod, error_message_lod = GeometryMesh(lod_mesh, self.small_object_threshold, self.scale_factor).Get()
+            lod_info, error_message_lod = GeometryMesh(lod_mesh, self.small_object_threshold, self.scale_factor).Get()
 
-            self.geometry_node = {}
-            self.geometry_node['id'] = occurrence_id
-            self.geometry_node['lods'] = [ lod ]
+            self.geometry_node = PGeometryNode()
+            self.geometry_node.UniqueID = int(occurrence_id)
+            self.geometry_node.LODs.append(lod_info)
 
             if error_message_lod:
                 self.error_messages.append(error_message_lod)

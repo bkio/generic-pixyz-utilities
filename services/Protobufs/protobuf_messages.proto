@@ -8,11 +8,11 @@
 
 // [START declaration]
 syntax = "proto3";
-package generic_pixyz_proto;
+package protobuf_messages;
 // [END declaration]
 
 // [START csharp_declaration]
-option csharp_namespace = "PixyzWorkerProcess.Processing.Models";
+option csharp_namespace = "PixyzWorkerProcess.Processing.Protobufs";
 // [END csharp_declaration]
 
 // [START messages]
@@ -52,7 +52,7 @@ message PLOD {
 }
 
 message PGeometryPart {
-  uint64 GeometryId = 1;
+  uint64 GeometryID = 1;
   PVector3D Location = 2;
   PVector3D Rotation = 3;
   PVector3D Scale = 4;
@@ -74,7 +74,7 @@ message PMetadataNode {
 
 message PGeometryNode {
   uint64 UniqueID = 1;
-  uint32 LodNumber = 2;
+  int32 LodNumber = 2;
   repeated PLOD LODs = 3;
 }
 
@@ -85,6 +85,6 @@ message PNodeMessage {
   PMetadataNode MetadataNode = 4;
   PGeometryNode GeometryNode = 5;
   bool Done = 6;
-  uint32 MessageCount = 7;
+  int32 MessageCount = 7;
 }
 // [END messages]

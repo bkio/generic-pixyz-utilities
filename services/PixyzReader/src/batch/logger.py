@@ -37,30 +37,13 @@ class Logger:
         total_vertexNormalTangentList = 0
         total_indexes = 0
 
-        done = data['done']
-        errors = data['errors']
+        done = data.Done
+        errors = data.Errors
         error_count = 0
         if errors is not None:
             error_count = len(errors)
 
-        if done:
-            logging.warning(f"=====> Done message has been sent. \tMessageCount: {message_count} \tMessageSize: {message_size} \tErrorCount: {error_count}")
-        else:
-            try:
-                geometryNode = data['geometryNode']
-                if geometryNode is not None:
-                    lod = geometryNode['lods'][0]
-                    lod_level = geometryNode['lodNumber']
-                    id = geometryNode['id']
-
-                    total_vertexNormalTangentList += len(lod['vertexNormalTangentList'])
-                    total_indexes += len(lod['indexes'])
-                    
-                    logging.warning(f"=====> Message has been sent. \tMessageCount: {message_count} \tMessageSize: {message_size} \tErrorCount: {error_count}. \tID:{id} \tLOD{lod_level} \tIndices: {total_indexes} \tVertices: {total_vertexNormalTangentList}")
-                else:
-                    logging.warning(f"=====> Message has been sent. \tMessageCount: {message_count} \tMessageSize: {message_size} \tErrorCount: {error_count}. \t*** No LOD information")    
-            except Exception as e:
-                logging.warning(f"=====> Message has been sent. \tMessageCount: {message_count} \tMessageSize: {message_size} \tErrorCount: {error_count}. \t*** No LOD information")
+        logging.warning(f"=====> Message has been sent. \tMessageCount: {message_count} \tMessageSize: {message_size} \tErrorCount: {error_count} \tDone: {done}")
 
     def PrintOccurrenceInfo(self, occurrences):
         n_triangles = scene.getPolygonCount(occurrences, True, False, False)

@@ -9,7 +9,7 @@ namespace PixyzWorkerProcess.Processing.Models
     public class NodeMessage
     {
         [JsonProperty("model_id")]
-        public ulong ModelId { get; set; }
+        public ulong ModelID { get; set; }
         
         [JsonProperty("errors")]
         public string[] Errors { get; set; }

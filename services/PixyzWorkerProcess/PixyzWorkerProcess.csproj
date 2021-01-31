@@ -20,6 +20,7 @@
   <Import Project="..\..\submodules\bfilesdk-dotnet\common\BFileSDK-Dotnet\BFileSDK-Dotnet.projitems" Label="Shared" />
 
   <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.14.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 

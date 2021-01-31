@@ -15,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.IO.Compression;
 using System.Linq;
+using PixyzWorkerProcess.Processing.Protobufs;
 
 namespace PixyzWorkerProcess.Processing
 {
@@ -308,10 +309,16 @@ namespace PixyzWorkerProcess.Processing
                         decompressionStream.CopyTo(OutputStream);
                     }
 
-                    string DecompressedMessage = Encoding.UTF8.GetString(OutputStream.ToArray());
+                    //string DecompressedMessage = Encoding.UTF8.GetString(OutputStream.ToArray());
 
-                    NodeMessage MessageReceived = JsonConvert.DeserializeObject<NodeMessage>(DecompressedMessage);
-                    NodeMessage MessageReceivedCompressCopy = JsonConvert.DeserializeObject<NodeMessage>(DecompressedMessage);
+                    //NodeMessage MessageReceived = JsonConvert.DeserializeObject<NodeMessage>(DecompressedMessage);
+                    //NodeMessage MessageReceivedCompressCopy = JsonConvert.DeserializeObject<NodeMessage>(DecompressedMessage);
+                    
+                    byte[] DecompressedArray = OutputStream.ToArray();
+
+                    PNodeMessage ReceivedMessage = PNodeMessage.Parser.ParseFrom(DecompressedArray);
+                    NodeMessage MessageReceived = ConvertNodeMessage(ReceivedMessage);
+                    NodeMessage MessageReceivedCompressCopy = ConvertNodeMessage(ReceivedMessage);
 
                     AddMessage(MessageReceived, MessageReceivedCompressCopy, _ErrorMessageAction);
                 }
@@ -418,6 +425,116 @@ namespace PixyzWorkerProcess.Processing
                     }
                 }
             }
+        }
+
+        public NodeMessage ConvertNodeMessage(PNodeMessage ProtoMessage)
+        {
+            NodeMessage _Message = new NodeMessage();
+            _Message.Done = ProtoMessage.Done;
+            _Message.ModelID = ProtoMessage.ModelID;
+            _Message.MessageCount = ProtoMessage.MessageCount;
+            _Message.Errors = ProtoMessage.Errors.ToArray<string>();
+            if(ProtoMessage.HierarchyNode != null)
+            {
+                _Message.HierarchyNode = ConvertNodeH(ProtoMessage.HierarchyNode);
+            }
+            if(ProtoMessage.GeometryNode != null)
+            {
+                _Message.GeometryNode = ConvertNodeG(ProtoMessage.GeometryNode);
+            }
+            if(ProtoMessage.MetadataNode != null)
+            {
+                _Message.MetadataNode = ConvertNodeM(ProtoMessage.MetadataNode);
+            }
+            return _Message;
+        }
+
+        public HierarchyNode ConvertNodeH(PHierarchyNode ProtoNode)
+        {
+            HierarchyNode _Node = new HierarchyNode();
+            _Node.UniqueID = ProtoNode.UniqueID;
+            _Node.ParentID = ProtoNode.ParentID;
+            _Node.MetadataID = ProtoNode.MetadataID;
+            _Node.GeometryParts = new List<HierarchyNode.GeometryPart>();
+            if (ProtoNode.GeometryParts.Count > 0)
+            {
+                foreach (var Item in ProtoNode.GeometryParts)
+                {
+                    var Part = new HierarchyNode.GeometryPart();
+                    Part.GeometryID = Item.GeometryID;
+                    Part.Location = new ServiceUtilities.Process.Geometry.Vector3D();
+                    Part.Rotation = new ServiceUtilities.Process.Geometry.Vector3D();
+                    Part.Scale = new ServiceUtilities.Process.Geometry.Vector3D();
+                    Part.Color = new ServiceUtilities.Process.Geometry.Color();
+                    if (Item.Location != null)
+                    {
+                        Part.Location = new ServiceUtilities.Process.Geometry.Vector3D(Item.Location.X, Item.Location.Y, Item.Location.Z);
+                    }
+                    if (Item.Rotation != null)
+                    {
+                        Part.Rotation = new ServiceUtilities.Process.Geometry.Vector3D(Item.Rotation.X, Item.Rotation.Y, Item.Rotation.Z);
+                    }
+                    if (Item.Scale != null)
+                    {
+                        Part.Scale = new ServiceUtilities.Process.Geometry.Vector3D(Item.Scale.X, Item.Scale.Y, Item.Scale.Z);
+                    }
+                    if (Item.Color != null)
+                    {
+                        Part.Color = new ServiceUtilities.Process.Geometry.Color((byte)Item.Color.R, (byte)Item.Color.G, (byte)Item.Color.B);
+                    }
+                    _Node.GeometryParts.Add(Part);
+                }
+            }
+            if (ProtoNode.ChildNodes.Count > 0)
+            {
+                _Node.ChildNodes.AddRange(ProtoNode.ChildNodes);
+            }
+            return _Node;
+        }
+
+        public LodMessage ConvertNodeG(PGeometryNode ProtoNode)
+        {
+            LodMessage _Node = new LodMessage();
+            _Node.UniqueID = ProtoNode.UniqueID;
+            _Node.LodNumber = ProtoNode.LodNumber;
+            if (ProtoNode.LODs.Count == 1)
+            {
+                var CurrentProtoLOD = ProtoNode.LODs[0];
+                ServiceUtilities.Process.Geometry.LOD CurrentLOD = new ServiceUtilities.Process.Geometry.LOD();
+                CurrentLOD.VertexNormalTangentList = new List<ServiceUtilities.Process.Geometry.VertexNormalTangent>();
+                foreach (var Item in CurrentProtoLOD.VertexNormalTangentList)
+                {
+                    var VertNormTang = new ServiceUtilities.Process.Geometry.VertexNormalTangent();
+                    VertNormTang.Vertex = new ServiceUtilities.Process.Geometry.Vector3D();
+                    VertNormTang.Normal = new ServiceUtilities.Process.Geometry.Vector3D();
+                    VertNormTang.Tangent = new ServiceUtilities.Process.Geometry.Vector3D();
+                    if (Item.Vertex != null)
+                    {
+                        VertNormTang.Vertex = new ServiceUtilities.Process.Geometry.Vector3D(Item.Vertex.X, Item.Vertex.Y, Item.Vertex.Z);
+                    }
+                    if (Item.Normal != null)
+                    {
+                        VertNormTang.Normal = new ServiceUtilities.Process.Geometry.Vector3D(Item.Normal.X, Item.Normal.Y, Item.Normal.Z);
+                    }
+                    if (Item.Tangent != null)
+                    {
+                        VertNormTang.Tangent = new ServiceUtilities.Process.Geometry.Vector3D(Item.Tangent.X, Item.Tangent.Y, Item.Tangent.Z);
+                    }
+                    CurrentLOD.VertexNormalTangentList.Add(VertNormTang);
+                }
+                CurrentLOD.Indexes = new List<uint>();
+                CurrentLOD.Indexes.AddRange(CurrentProtoLOD.Indexes);
+                _Node.LODs.Add(CurrentLOD);
+            }
+            return _Node;
+        }
+
+        public MetadataNode ConvertNodeM(PMetadataNode ProtoNode)
+        {
+            MetadataNode _Node = new MetadataNode();
+            _Node.UniqueID = ProtoNode.UniqueID;
+            _Node.Metadata = ProtoNode.Metadata;
+            return _Node;
         }
 
         private string CompleteWrites(Action<string> _ErrorMessageAction = null)

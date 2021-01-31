@@ -19,91 +19,91 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{68
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{B687060E-8A36-45C5-B98C-D6F16DF344C3}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-VMService-GC", "Submodules\BDotNetFramework\Services\BServiceUtilities-VMService-GC\BServiceUtilities-VMService-GC.shproj", "{957218FD-0307-4215-B7C9-CA7D207A0309}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-VMService-GC", "submodules\BDotNetFramework\Services\BServiceUtilities-VMService-GC\BServiceUtilities-VMService-GC.shproj", "{957218FD-0307-4215-B7C9-CA7D207A0309}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-TracingService-Zipkin", "Submodules\BDotNetFramework\Services\BServiceUtilities-TracingService-Zipkin\BServiceUtilities-TracingService-Zipkin.shproj", "{18AFC8BD-2D17-40F0-B02C-34F67C5A7D79}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-TracingService-Zipkin", "submodules\BDotNetFramework\Services\BServiceUtilities-TracingService-Zipkin\BServiceUtilities-TracingService-Zipkin.shproj", "{18AFC8BD-2D17-40F0-B02C-34F67C5A7D79}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-TracingService-GC", "Submodules\BDotNetFramework\Services\BServiceUtilities-TracingService-GC\BServiceUtilities-TracingService-GC.shproj", "{69BF3823-D5CD-42C4-BE63-8133A6D97A93}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-TracingService-GC", "submodules\BDotNetFramework\Services\BServiceUtilities-TracingService-GC\BServiceUtilities-TracingService-GC.shproj", "{69BF3823-D5CD-42C4-BE63-8133A6D97A93}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-SMSService-Twilio", "Submodules\BDotNetFramework\Services\BServiceUtilities-SMSService-Twilio\BServiceUtilities-SMSService-Twilio.shproj", "{B4DD4534-945F-4FD1-894D-E5AC2CC254FC}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-SMSService-Twilio", "submodules\BDotNetFramework\Services\BServiceUtilities-SMSService-Twilio\BServiceUtilities-SMSService-Twilio.shproj", "{B4DD4534-945F-4FD1-894D-E5AC2CC254FC}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-PubSubService-Redis", "Submodules\BDotNetFramework\Services\BServiceUtilities-PubSubService-Redis\BServiceUtilities-PubSubService-Redis.shproj", "{58D5D147-A1C6-4051-9CB0-1D4B44949AA6}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-PubSubService-Redis", "submodules\BDotNetFramework\Services\BServiceUtilities-PubSubService-Redis\BServiceUtilities-PubSubService-Redis.shproj", "{58D5D147-A1C6-4051-9CB0-1D4B44949AA6}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-PubSubService-GC", "Submodules\BDotNetFramework\Services\BServiceUtilities-PubSubService-GC\BServiceUtilities-PubSubService-GC.shproj", "{1CE00F9B-1598-40BC-80B0-A184D2A68246}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-PubSubService-GC", "submodules\BDotNetFramework\Services\BServiceUtilities-PubSubService-GC\BServiceUtilities-PubSubService-GC.shproj", "{1CE00F9B-1598-40BC-80B0-A184D2A68246}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-PubSubService-AWS", "Submodules\BDotNetFramework\Services\BServiceUtilities-PubSubService-AWS\BServiceUtilities-PubSubService-AWS.shproj", "{6A9D7D85-897B-4660-B068-C8246BE79519}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-PubSubService-AWS", "submodules\BDotNetFramework\Services\BServiceUtilities-PubSubService-AWS\BServiceUtilities-PubSubService-AWS.shproj", "{6A9D7D85-897B-4660-B068-C8246BE79519}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-MemoryService-Redis", "Submodules\BDotNetFramework\Services\BServiceUtilities-MemoryService-Redis\BServiceUtilities-MemoryService-Redis.shproj", "{5CF16D7B-E3ED-463B-BBD9-BA483A7EB4BE}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-MemoryService-Redis", "submodules\BDotNetFramework\Services\BServiceUtilities-MemoryService-Redis\BServiceUtilities-MemoryService-Redis.shproj", "{5CF16D7B-E3ED-463B-BBD9-BA483A7EB4BE}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-MailService-SendGrid", "Submodules\BDotNetFramework\Services\BServiceUtilities-MailService-SendGrid\BServiceUtilities-MailService-SendGrid.shproj", "{66A97FF4-5D8D-44E4-B5A0-2875B566DCB9}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-MailService-SendGrid", "submodules\BDotNetFramework\Services\BServiceUtilities-MailService-SendGrid\BServiceUtilities-MailService-SendGrid.shproj", "{66A97FF4-5D8D-44E4-B5A0-2875B566DCB9}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-LoggingService-GC", "Submodules\BDotNetFramework\Services\BServiceUtilities-LoggingService-GC\BServiceUtilities-LoggingService-GC.shproj", "{ABF9C164-ADDE-4E24-B5D9-2B4247F323D9}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-LoggingService-GC", "submodules\BDotNetFramework\Services\BServiceUtilities-LoggingService-GC\BServiceUtilities-LoggingService-GC.shproj", "{ABF9C164-ADDE-4E24-B5D9-2B4247F323D9}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-LoggingService-AWS", "Submodules\BDotNetFramework\Services\BServiceUtilities-LoggingService-AWS\BServiceUtilities-LoggingService-AWS.shproj", "{1D64AFE7-5361-41BF-A1AC-95CE4B81D988}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-LoggingService-AWS", "submodules\BDotNetFramework\Services\BServiceUtilities-LoggingService-AWS\BServiceUtilities-LoggingService-AWS.shproj", "{1D64AFE7-5361-41BF-A1AC-95CE4B81D988}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-FileService-GC", "Submodules\BDotNetFramework\Services\BServiceUtilities-FileService-GC\BServiceUtilities-FileService-GC.shproj", "{C7D560AC-A66B-44E9-8634-26543A8EAD2D}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-FileService-GC", "submodules\BDotNetFramework\Services\BServiceUtilities-FileService-GC\BServiceUtilities-FileService-GC.shproj", "{C7D560AC-A66B-44E9-8634-26543A8EAD2D}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-FileService-AWS", "Submodules\BDotNetFramework\Services\BServiceUtilities-FileService-AWS\BServiceUtilities-FileService-AWS.shproj", "{1C6C3236-F3D0-41D7-8E27-25FC29439511}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-FileService-AWS", "submodules\BDotNetFramework\Services\BServiceUtilities-FileService-AWS\BServiceUtilities-FileService-AWS.shproj", "{1C6C3236-F3D0-41D7-8E27-25FC29439511}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-DatabaseService-GC", "Submodules\BDotNetFramework\Services\BServiceUtilities-DatabaseService-GC\BServiceUtilities-DatabaseService-GC.shproj", "{747F302D-F7A8-468B-BE17-0DFC46A1F181}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-DatabaseService-GC", "submodules\BDotNetFramework\Services\BServiceUtilities-DatabaseService-GC\BServiceUtilities-DatabaseService-GC.shproj", "{747F302D-F7A8-468B-BE17-0DFC46A1F181}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-DatabaseService-AWS", "Submodules\BDotNetFramework\Services\BServiceUtilities-DatabaseService-AWS\BServiceUtilities-DatabaseService-AWS.shproj", "{D41EDAE0-59E2-4FAF-9FDA-B36C7B22AC60}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities-DatabaseService-AWS", "submodules\BDotNetFramework\Services\BServiceUtilities-DatabaseService-AWS\BServiceUtilities-DatabaseService-AWS.shproj", "{D41EDAE0-59E2-4FAF-9FDA-B36C7B22AC60}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities", "Submodules\BDotNetFramework\Services\BServiceUtilities\BServiceUtilities.shproj", "{CD786AA9-0EFF-4445-B49C-FAE46451F8BC}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BServiceUtilities", "submodules\BDotNetFramework\Services\BServiceUtilities\BServiceUtilities.shproj", "{CD786AA9-0EFF-4445-B49C-FAE46451F8BC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BSecretManagementService", "Submodules\BDotNetFramework\Services\BSecretManagementService\BSecretManagementService.csproj", "{69E121B4-6EF6-4284-90A2-047107B32124}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BSecretManagementService", "submodules\BDotNetFramework\Services\BSecretManagementService\BSecretManagementService.csproj", "{69E121B4-6EF6-4284-90A2-047107B32124}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ServiceUtilities_PubSub_Users", "Submodules\BDotNetFramework\Utilities\ServiceUtilities_PubSub_Users\ServiceUtilities_PubSub_Users.shproj", "{BECBE5E8-7D82-4EC0-996F-380D24E065F1}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ServiceUtilities_PubSub_Users", "submodules\BDotNetFramework\Utilities\ServiceUtilities_PubSub_Users\ServiceUtilities_PubSub_Users.shproj", "{BECBE5E8-7D82-4EC0-996F-380D24E065F1}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ServiceUtilities_PubSub_DB_Users", "Submodules\BDotNetFramework\Utilities\ServiceUtilities_PubSub_DB_Users\ServiceUtilities_PubSub_DB_Users.shproj", "{F87B8C2B-AD95-4C42-8D8E-DF69483A6139}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ServiceUtilities_PubSub_DB_Users", "submodules\BDotNetFramework\Utilities\ServiceUtilities_PubSub_DB_Users\ServiceUtilities_PubSub_DB_Users.shproj", "{F87B8C2B-AD95-4C42-8D8E-DF69483A6139}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ServiceUtilities_All", "Submodules\BDotNetFramework\Utilities\ServiceUtilities_All\ServiceUtilities_All.shproj", "{CED4E48F-9644-4DCF-A6A2-1D91EEF01D87}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ServiceUtilities_All", "submodules\BDotNetFramework\Utilities\ServiceUtilities_All\ServiceUtilities_All.shproj", "{CED4E48F-9644-4DCF-A6A2-1D91EEF01D87}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BWebServiceUtilities-GC", "Submodules\BDotNetFramework\Utilities\BWebServiceUtilities-GC\BWebServiceUtilities-GC.csproj", "{0715521E-5082-4645-8906-6E0598D4BC61}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BWebServiceUtilities-GC", "submodules\BDotNetFramework\Utilities\BWebServiceUtilities-GC\BWebServiceUtilities-GC.csproj", "{0715521E-5082-4645-8906-6E0598D4BC61}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BWebServiceUtilities", "Submodules\BDotNetFramework\Utilities\BWebServiceUtilities\BWebServiceUtilities.csproj", "{C2B70EBD-550E-41D9-9EA4-8D51DD6D527A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BWebServiceUtilities", "submodules\BDotNetFramework\Utilities\BWebServiceUtilities\BWebServiceUtilities.csproj", "{C2B70EBD-550E-41D9-9EA4-8D51DD6D527A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCommonUtilities", "Submodules\BDotNetFramework\Utilities\BCommonUtilities\BCommonUtilities.csproj", "{8D277726-B440-4D03-9CD8-A914ABE80290}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCommonUtilities", "submodules\BDotNetFramework\Utilities\BCommonUtilities\BCommonUtilities.csproj", "{8D277726-B440-4D03-9CD8-A914ABE80290}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-Tests", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-Tests\BCloudServiceUtilities-Tests.csproj", "{FC6F1846-46B1-4F1D-860F-DFB94BD40CA1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-Tests", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-Tests\BCloudServiceUtilities-Tests.csproj", "{FC6F1846-46B1-4F1D-860F-DFB94BD40CA1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BVMService-GC", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BVMService-GC\BCloudServiceUtilities-BVMService-GC.csproj", "{1FFCFD01-C82E-42EE-B1DA-9310707FE2A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BVMService-GC", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BVMService-GC\BCloudServiceUtilities-BVMService-GC.csproj", "{1FFCFD01-C82E-42EE-B1DA-9310707FE2A9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BTracingService-Zipkin", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BTracingService-Zipkin\BCloudServiceUtilities-BTracingService-Zipkin.csproj", "{82D823DC-7111-47B4-8437-FF26D8D5D45D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BTracingService-Zipkin", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BTracingService-Zipkin\BCloudServiceUtilities-BTracingService-Zipkin.csproj", "{82D823DC-7111-47B4-8437-FF26D8D5D45D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BTracingService-GC", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BTracingService-GC\BCloudServiceUtilities-BTracingService-GC.csproj", "{3DF46DF5-C39C-4901-9F23-120D75263EB9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BTracingService-GC", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BTracingService-GC\BCloudServiceUtilities-BTracingService-GC.csproj", "{3DF46DF5-C39C-4901-9F23-120D75263EB9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BSMSService-Twilio", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BSMSService-Twilio\BCloudServiceUtilities-BSMSService-Twilio.csproj", "{86911698-53BE-41EF-BD9D-25C08D2E1481}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BSMSService-Twilio", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BSMSService-Twilio\BCloudServiceUtilities-BSMSService-Twilio.csproj", "{86911698-53BE-41EF-BD9D-25C08D2E1481}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BPubSubService-Redis", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BPubSubService-Redis\BCloudServiceUtilities-BPubSubService-Redis.csproj", "{4C860DE6-3415-492F-9276-81FE02D805B9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BPubSubService-Redis", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BPubSubService-Redis\BCloudServiceUtilities-BPubSubService-Redis.csproj", "{4C860DE6-3415-492F-9276-81FE02D805B9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BPubSubService-GC", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BPubSubService-GC\BCloudServiceUtilities-BPubSubService-GC.csproj", "{DF4F8D38-C7E4-4476-8BFA-8C56DFD73A1B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BPubSubService-GC", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BPubSubService-GC\BCloudServiceUtilities-BPubSubService-GC.csproj", "{DF4F8D38-C7E4-4476-8BFA-8C56DFD73A1B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BPubSubService-AWS", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BPubSubService-AWS\BCloudServiceUtilities-BPubSubService-AWS.csproj", "{E55DFAB0-4FB8-4BEC-B778-98BAE5F5A69D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BPubSubService-AWS", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BPubSubService-AWS\BCloudServiceUtilities-BPubSubService-AWS.csproj", "{E55DFAB0-4FB8-4BEC-B778-98BAE5F5A69D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BPresentationService-GC", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BPresentationService-GC\BCloudServiceUtilities-BPresentationService-GC.csproj", "{C0076992-4683-48DB-A9C0-574C3744AD95}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BPresentationService-GC", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BPresentationService-GC\BCloudServiceUtilities-BPresentationService-GC.csproj", "{C0076992-4683-48DB-A9C0-574C3744AD95}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BMemoryService-Redis", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BMemoryService-Redis\BCloudServiceUtilities-BMemoryService-Redis.csproj", "{1A437BE3-5151-4F20-9923-5A250C507001}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BMemoryService-Redis", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BMemoryService-Redis\BCloudServiceUtilities-BMemoryService-Redis.csproj", "{1A437BE3-5151-4F20-9923-5A250C507001}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BMailService-SendGrid", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BMailService-SendGrid\BCloudServiceUtilities-BMailService-SendGrid.csproj", "{6680A6B1-B2B8-4B21-91CC-FC10D9A9B9D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BMailService-SendGrid", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BMailService-SendGrid\BCloudServiceUtilities-BMailService-SendGrid.csproj", "{6680A6B1-B2B8-4B21-91CC-FC10D9A9B9D5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BLoggingService-GC", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BLoggingService-GC\BCloudServiceUtilities-BLoggingService-GC.csproj", "{06D38444-185C-4CB3-BA13-75F797474BA8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BLoggingService-GC", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BLoggingService-GC\BCloudServiceUtilities-BLoggingService-GC.csproj", "{06D38444-185C-4CB3-BA13-75F797474BA8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BLoggingService-Basic", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BLoggingService-Basic\BCloudServiceUtilities-BLoggingService-Basic.csproj", "{1BB1FCF3-9300-4A84-BB0F-A9BF3D8D653C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BLoggingService-Basic", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BLoggingService-Basic\BCloudServiceUtilities-BLoggingService-Basic.csproj", "{1BB1FCF3-9300-4A84-BB0F-A9BF3D8D653C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BLoggingService-AWS", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BLoggingService-AWS\BCloudServiceUtilities-BLoggingService-AWS.csproj", "{BADF825A-C4AF-42B8-A193-0FB89968AF65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BLoggingService-AWS", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BLoggingService-AWS\BCloudServiceUtilities-BLoggingService-AWS.csproj", "{BADF825A-C4AF-42B8-A193-0FB89968AF65}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BFileService-GC", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BFileService-GC\BCloudServiceUtilities-BFileService-GC.csproj", "{29FAD7F4-8244-409C-838F-674185C37FD5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BFileService-GC", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BFileService-GC\BCloudServiceUtilities-BFileService-GC.csproj", "{29FAD7F4-8244-409C-838F-674185C37FD5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BFileService-AWS", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BFileService-AWS\BCloudServiceUtilities-BFileService-AWS.csproj", "{F897837A-3A68-463B-A444-E023DB0E3FA7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BFileService-AWS", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BFileService-AWS\BCloudServiceUtilities-BFileService-AWS.csproj", "{F897837A-3A68-463B-A444-E023DB0E3FA7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BDatabaseService-MongoDB", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BDatabaseService-MongoDB\BCloudServiceUtilities-BDatabaseService-MongoDB.csproj", "{ED399CCD-2AC5-4E68-9F0D-800158D36B27}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BDatabaseService-MongoDB", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BDatabaseService-MongoDB\BCloudServiceUtilities-BDatabaseService-MongoDB.csproj", "{ED399CCD-2AC5-4E68-9F0D-800158D36B27}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BDatabaseService-GC", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BDatabaseService-GC\BCloudServiceUtilities-BDatabaseService-GC.csproj", "{03AA19AA-F370-4C83-BEEC-65D725F19363}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BDatabaseService-GC", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BDatabaseService-GC\BCloudServiceUtilities-BDatabaseService-GC.csproj", "{03AA19AA-F370-4C83-BEEC-65D725F19363}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BDatabaseService-AWS", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BDatabaseService-AWS\BCloudServiceUtilities-BDatabaseService-AWS.csproj", "{8C278409-81AC-4F3E-B6C4-DCA8AC6A52AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities-BDatabaseService-AWS", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities-BDatabaseService-AWS\BCloudServiceUtilities-BDatabaseService-AWS.csproj", "{8C278409-81AC-4F3E-B6C4-DCA8AC6A52AF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities", "Submodules\BDotNetFramework\Utilities\BCloudServiceUtilities\BCloudServiceUtilities.csproj", "{DEB2F0E9-67B0-4D84-8ED9-86CE4371B438}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities", "submodules\BDotNetFramework\Utilities\BCloudServiceUtilities\BCloudServiceUtilities.csproj", "{DEB2F0E9-67B0-4D84-8ED9-86CE4371B438}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BFileSDK-Dotnet", "submodules\bfilesdk-dotnet\common\BFileSDK-Dotnet\BFileSDK-Dotnet.shproj", "{F286B3E7-DAAB-468C-8399-93D3A8F26394}"
 EndProject
@@ -116,29 +116,29 @@ Global
 		submodules\BDotNetFramework\Services\BServiceUtilities\BServiceUtilities.projitems*{06b29cdb-89d3-40a3-8abe-89030b32a047}*SharedItemsImports = 5
 		submodules\BDotNetFramework\Utilities\ServiceUtilities_All\ServiceUtilities_All.projitems*{06b29cdb-89d3-40a3-8abe-89030b32a047}*SharedItemsImports = 5
 		submodules\bfilesdk-dotnet\common\BFileSDK-Dotnet\BFileSDK-Dotnet.projitems*{06b29cdb-89d3-40a3-8abe-89030b32a047}*SharedItemsImports = 5
-		Submodules\BDotNetFramework\Services\BServiceUtilities-TracingService-Zipkin\BServiceUtilities-TracingService-Zipkin.projitems*{18afc8bd-2d17-40f0-b02c-34f67c5a7d79}*SharedItemsImports = 13
-		Submodules\BDotNetFramework\Services\BServiceUtilities-FileService-AWS\BServiceUtilities-FileService-AWS.projitems*{1c6c3236-f3d0-41d7-8e27-25fc29439511}*SharedItemsImports = 13
-		Submodules\BDotNetFramework\Services\BServiceUtilities-PubSubService-GC\BServiceUtilities-PubSubService-GC.projitems*{1ce00f9b-1598-40bc-80b0-a184d2a68246}*SharedItemsImports = 13
-		Submodules\BDotNetFramework\Services\BServiceUtilities-LoggingService-AWS\BServiceUtilities-LoggingService-AWS.projitems*{1d64afe7-5361-41bf-a1ac-95ce4b81d988}*SharedItemsImports = 13
-		Submodules\BDotNetFramework\Services\BServiceUtilities-PubSubService-Redis\BServiceUtilities-PubSubService-Redis.projitems*{58d5d147-a1c6-4051-9cb0-1d4b44949aa6}*SharedItemsImports = 13
+		submodules\BDotNetFramework\Services\BServiceUtilities-TracingService-Zipkin\BServiceUtilities-TracingService-Zipkin.projitems*{18afc8bd-2d17-40f0-b02c-34f67c5a7d79}*SharedItemsImports = 13
+		submodules\BDotNetFramework\Services\BServiceUtilities-FileService-AWS\BServiceUtilities-FileService-AWS.projitems*{1c6c3236-f3d0-41d7-8e27-25fc29439511}*SharedItemsImports = 13
+		submodules\BDotNetFramework\Services\BServiceUtilities-PubSubService-GC\BServiceUtilities-PubSubService-GC.projitems*{1ce00f9b-1598-40bc-80b0-a184d2a68246}*SharedItemsImports = 13
+		submodules\BDotNetFramework\Services\BServiceUtilities-LoggingService-AWS\BServiceUtilities-LoggingService-AWS.projitems*{1d64afe7-5361-41bf-a1ac-95ce4b81d988}*SharedItemsImports = 13
+		submodules\BDotNetFramework\Services\BServiceUtilities-PubSubService-Redis\BServiceUtilities-PubSubService-Redis.projitems*{58d5d147-a1c6-4051-9cb0-1d4b44949aa6}*SharedItemsImports = 13
 		submodules\BDotNetFramework\Services\BServiceUtilities-MemoryService-Redis\BServiceUtilities-MemoryService-Redis.projitems*{5cf16d7b-e3ed-463b-bbd9-ba483a7eb4be}*SharedItemsImports = 13
-		Submodules\BDotNetFramework\Services\BServiceUtilities-MailService-SendGrid\BServiceUtilities-MailService-SendGrid.projitems*{66a97ff4-5d8d-44e4-b5a0-2875b566dcb9}*SharedItemsImports = 13
+		submodules\BDotNetFramework\Services\BServiceUtilities-MailService-SendGrid\BServiceUtilities-MailService-SendGrid.projitems*{66a97ff4-5d8d-44e4-b5a0-2875b566dcb9}*SharedItemsImports = 13
 		submodules\BDotNetFramework\Services\BServiceUtilities-TracingService-GC\BServiceUtilities-TracingService-GC.projitems*{69bf3823-d5cd-42c4-be63-8133a6d97a93}*SharedItemsImports = 13
 		submodules\BDotNetFramework\Services\BServiceUtilities-FileService-GC\BServiceUtilities-FileService-GC.projitems*{69e121b4-6ef6-4284-90a2-047107b32124}*SharedItemsImports = 5
 		submodules\BDotNetFramework\Services\BServiceUtilities-TracingService-GC\BServiceUtilities-TracingService-GC.projitems*{69e121b4-6ef6-4284-90a2-047107b32124}*SharedItemsImports = 5
 		submodules\BDotNetFramework\Services\BServiceUtilities\BServiceUtilities.projitems*{69e121b4-6ef6-4284-90a2-047107b32124}*SharedItemsImports = 5
-		Submodules\BDotNetFramework\Services\BServiceUtilities-PubSubService-AWS\BServiceUtilities-PubSubService-AWS.projitems*{6a9d7d85-897b-4660-b068-c8246be79519}*SharedItemsImports = 13
-		Submodules\BDotNetFramework\Services\BServiceUtilities-DatabaseService-GC\BServiceUtilities-DatabaseService-GC.projitems*{747f302d-f7a8-468b-be17-0dfc46a1f181}*SharedItemsImports = 13
-		Submodules\BDotNetFramework\Services\BServiceUtilities-VMService-GC\BServiceUtilities-VMService-GC.projitems*{957218fd-0307-4215-b7c9-ca7d207a0309}*SharedItemsImports = 13
+		submodules\BDotNetFramework\Services\BServiceUtilities-PubSubService-AWS\BServiceUtilities-PubSubService-AWS.projitems*{6a9d7d85-897b-4660-b068-c8246be79519}*SharedItemsImports = 13
+		submodules\BDotNetFramework\Services\BServiceUtilities-DatabaseService-GC\BServiceUtilities-DatabaseService-GC.projitems*{747f302d-f7a8-468b-be17-0dfc46a1f181}*SharedItemsImports = 13
+		submodules\BDotNetFramework\Services\BServiceUtilities-VMService-GC\BServiceUtilities-VMService-GC.projitems*{957218fd-0307-4215-b7c9-ca7d207a0309}*SharedItemsImports = 13
 		submodules\BDotNetFramework\Services\BServiceUtilities-LoggingService-GC\BServiceUtilities-LoggingService-GC.projitems*{abf9c164-adde-4e24-b5d9-2b4247f323d9}*SharedItemsImports = 13
-		Submodules\BDotNetFramework\Services\BServiceUtilities-SMSService-Twilio\BServiceUtilities-SMSService-Twilio.projitems*{b4dd4534-945f-4fd1-894d-e5ac2cc254fc}*SharedItemsImports = 13
-		Submodules\BDotNetFramework\Utilities\ServiceUtilities_PubSub_Users\ServiceUtilities_PubSub_Users.projitems*{becbe5e8-7d82-4ec0-996f-380d24e065f1}*SharedItemsImports = 13
+		submodules\BDotNetFramework\Services\BServiceUtilities-SMSService-Twilio\BServiceUtilities-SMSService-Twilio.projitems*{b4dd4534-945f-4fd1-894d-e5ac2cc254fc}*SharedItemsImports = 13
+		submodules\BDotNetFramework\Utilities\ServiceUtilities_PubSub_Users\ServiceUtilities_PubSub_Users.projitems*{becbe5e8-7d82-4ec0-996f-380d24e065f1}*SharedItemsImports = 13
 		submodules\BDotNetFramework\Services\BServiceUtilities-FileService-GC\BServiceUtilities-FileService-GC.projitems*{c7d560ac-a66b-44e9-8634-26543a8ead2d}*SharedItemsImports = 13
 		submodules\BDotNetFramework\Services\BServiceUtilities\BServiceUtilities.projitems*{cd786aa9-0eff-4445-b49c-fae46451f8bc}*SharedItemsImports = 13
 		submodules\BDotNetFramework\Utilities\ServiceUtilities_All\ServiceUtilities_All.projitems*{ced4e48f-9644-4dcf-a6a2-1d91eef01d87}*SharedItemsImports = 13
-		Submodules\BDotNetFramework\Services\BServiceUtilities-DatabaseService-AWS\BServiceUtilities-DatabaseService-AWS.projitems*{d41edae0-59e2-4faf-9fda-b36c7b22ac60}*SharedItemsImports = 13
+		submodules\BDotNetFramework\Services\BServiceUtilities-DatabaseService-AWS\BServiceUtilities-DatabaseService-AWS.projitems*{d41edae0-59e2-4faf-9fda-b36c7b22ac60}*SharedItemsImports = 13
 		submodules\bfilesdk-dotnet\common\BFileSDK-Dotnet\BFileSDK-Dotnet.projitems*{f286b3e7-daab-468c-8399-93d3a8f26394}*SharedItemsImports = 13
-		Submodules\BDotNetFramework\Utilities\ServiceUtilities_PubSub_DB_Users\ServiceUtilities_PubSub_DB_Users.projitems*{f87b8c2b-ad95-4c42-8d8e-df69483a6139}*SharedItemsImports = 13
+		submodules\BDotNetFramework\Utilities\ServiceUtilities_PubSub_DB_Users\ServiceUtilities_PubSub_DB_Users.projitems*{f87b8c2b-ad95-4c42-8d8e-df69483a6139}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

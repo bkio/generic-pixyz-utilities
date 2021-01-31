@@ -51,7 +51,7 @@ def StartModelProcess(_logger):
         Logger("before operation").PrintModelInfo()
         # PixyzAlgorithms(verbose=True).RepairCAD()
         # PixyzAlgorithms(verbose=True).Tesellate()
-        # PixyzAlgorithms(verbose=True).RepairMesh()
+        PixyzAlgorithms(verbose=True).RepairMesh()
         # PixyzAlgorithms(verbose=True).ExplodePartByMaterials()
         # PixyzAlgorithms(verbose=True).DeletePatches()
         # PixyzAlgorithms(verbose=True).DeleteLines()
@@ -64,9 +64,12 @@ def StartModelProcess(_logger):
         PixyzAlgorithms(verbose=True).CreateNormals()
         PixyzAlgorithms(verbose=True).DecimateLow()
 
-        _ModelProcess = ProcessModel(model_id, _RedisClient, number_of_thread = 20, decimate_target_strategy="ratio", lod_levels=[100, 90, 80, 60, 20, 10], small_object_threshold=0, scale_factor=1000)
-        _ModelProcess.AddCustomInformation("hierarchy_id", None, True)
-        _ModelProcess.Start()
+        try:
+            _ModelProcess = ProcessModel(model_id, _RedisClient, number_of_thread = 20, decimate_target_strategy="ratio", lod_levels=[100, 90, 80, 60, 20, 10], small_object_threshold=0, scale_factor=1000)
+            _ModelProcess.AddCustomInformation("hierarchy_id", None, True)
+            _ModelProcess.Start()
+        except Exception as e:
+            Logger().Error(f"=====> ProcessModel Error {e}")
     else:
         _RedisClient.Error([system_error_message])
 

@@ -5,6 +5,7 @@ import time
 import json
 import sys
 from threading import Lock
+from .protobuf_messages_pb2 import *
 from .logger import Logger
 
 class RedisClient:
@@ -40,10 +41,11 @@ class RedisClient:
         return self.message_count
 
     def DeflateEncodeBase64(self, message):
-        compressed_message = zlib.compress(bytes(message, 'utf-8'))[2:-4]
+        # compressed_message = zlib.compress(bytes(message, 'utf-8'))[2:-4]
+        compressed_message = zlib.compress(message)[2:-4]
         return base64.b64encode(compressed_message)
 
-    def Publish(self, data, verbose = True):
+    def Publish(self, data:PNodeMessage, verbose = True):
         """ 
         Publish json data to specified channel
 
@@ -56,8 +58,9 @@ class RedisClient:
         """
         self.message_count = self.message_count + 1
 
+        # message = json.dumps(data)
+        message = data.SerializeToString()
         
-        message = json.dumps(data)
         base64_message = self.DeflateEncodeBase64(message)
 
         message_size = sys.getsizeof(base64_message)
@@ -93,8 +96,13 @@ class RedisClient:
         - Returns:\n
             - void\n
         """
-        data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': None, 'done': True, 'messageCount' : self.message_count }
-        self.Publish(data)
+        # data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': None, 'done': True, 'messageCount' : self.message_count }
+        # self.Publish(data)
+        NodeMessage = PNodeMessage()
+        NodeMessage.ModelID = int(self.model_id)
+        NodeMessage.Done = True
+        NodeMessage.MessageCount = self.message_count
+        self.Publish(NodeMessage)
 
     def Error(self, error_messages = []):
         """ 
@@ -106,8 +114,14 @@ class RedisClient:
         - Returns:\n
             - void\n
         """
-        data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': error_messages, 'done': True, 'messageCount' : self.message_count }
-        self.Publish(data)
+        # data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': error_messages, 'done': True, 'messageCount' : self.message_count }
+        # self.Publish(data)
+        NodeMessage = PNodeMessage()
+        NodeMessage.ModelID = int(self.model_id)
+        NodeMessage.Done = True
+        NodeMessage.Errors = self.error_messages
+        NodeMessage.MessageCount = self.message_count
+        self.Publish(NodeMessage)
 
     def __GetRedisInstance(self):
         """ 

@@ -1,5 +1,6 @@
 from .logger import Logger
 from .vector3_array import Vector3Array
+from .protobuf_messages_pb2 import *
 
 import pxz
 try:# Prevent IDE errors
@@ -15,7 +16,7 @@ class GeometryMesh:
 
         #Returns
         self.error_message = None
-        self.geometry_info = {}
+        self.lod_info = PLOD()
 
         meshDefinition = polygonal.getMeshDefinition(self.lod_mesh)
 
@@ -44,21 +45,27 @@ class GeometryMesh:
         indexes = meshTriangles
 
         if self.__IsSmallObject(vertices) == True:
-            self.geometry_info = {}
-            self.geometry_info['vertexNormalTangentList'] = []
-            self.geometry_info['indexes'] = []
+            self.lod_info = PLOD()
         else:
             vertexNormalTangentList = []
             for i in range(vertices_len):
-                vertexNormalTangent = {}
-                vertexNormalTangent['vertex'] = vertices[i]
-                vertexNormalTangent['normal'] = normals[i]
-                vertexNormalTangent['tangent'] = tangents[i]
-                vertexNormalTangentList.append(vertexNormalTangent)
+                VNTData = PVertexNormalTangent()
+                VNTData.Vertex.X = vertices[i].X
+                VNTData.Vertex.Y = vertices[i].Y
+                VNTData.Vertex.Z = vertices[i].Z
 
-            self.geometry_info = {}
-            self.geometry_info['vertexNormalTangentList'] = vertexNormalTangentList
-            self.geometry_info['indexes'] = indexes
+                VNTData.Normal.X = normals[i].X
+                VNTData.Normal.Y = normals[i].Y
+                VNTData.Normal.Z = normals[i].Z
+                
+                VNTData.Tangent.X = tangents[i].X
+                VNTData.Tangent.Y = tangents[i].Y
+                VNTData.Tangent.Z = tangents[i].Z
+                vertexNormalTangentList.append(VNTData)
+
+            self.lod_info = PLOD()
+            self.lod_info.VertexNormalTangentList.extend(vertexNormalTangentList)
+            self.lod_info.Indexes.extend(indexes)
 
     def __IsSmallObject(self, vertices):
         if self.small_object_threshold <= 0:
@@ -100,4 +107,4 @@ class GeometryMesh:
         return False
 
     def Get(self):
-        return [self.geometry_info, self.error_message]
+        return [self.lod_info, self.error_message]

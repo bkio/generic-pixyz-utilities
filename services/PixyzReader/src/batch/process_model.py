@@ -8,6 +8,7 @@ from .metadata_node import MetadataNode
 from .hierarchy_node import HierarchyNode
 from .geometry_node import GeometryNode
 from .pixyz_algorithms import PixyzAlgorithms
+from .protobuf_messages_pb2 import *
 
 import pxz
 try:# Prevent IDE errors
@@ -142,24 +143,55 @@ class ProcessModel:
         if int(lod_number) == 0:
             small_obj_threshold = 0
             metadata_id = str(random.getrandbits(64))
-            metadataNode = MetadataNode(occurrence, metadata_id).Get()
-            if metadataNode == None:
-                metadata_id = None
+            try:
+                metadataNode = MetadataNode(occurrence, metadata_id).Get()
+                if metadataNode == None:
+                    metadata_id = None
+            except Exception as e:
+                Logger().Error(f"=====> MetadataNode Error {e}")
 
-            hierarchyNode = HierarchyNode(self.part_occurrences, occurrence, parent_id, hierarchy_id, metadata_id, self.scale_factor).Get()
+            try:
+                hierarchyNode = HierarchyNode(self.part_occurrences, occurrence, parent_id, hierarchy_id, metadata_id, self.scale_factor).Get()
+            except Exception as e:
+                Logger().Error(f"=====> HierarchyNode Error {e}")
 
         geometryNode, error_messages = [None, None]
 
         if Utils().BisectSearch(self.prototype_parts, occurrence):
             thread_lock = self.redis_client.GetLock()
             current_decimate_value = self.decimate_values[lod_number]
-            geometryNode, error_messages = GeometryNode(thread_lock, occurrence, lod_number, self.decimate_target_strategy, current_decimate_value, small_obj_threshold, self.scale_factor).Get()
+            try:
+                geometryNode, error_messages = GeometryNode(thread_lock, occurrence, lod_number, self.decimate_target_strategy, current_decimate_value, small_obj_threshold, self.scale_factor).Get()
+            except Exception as e:
+                Logger().Error(f"=====> GeometryNode Error {e}")
 
         if geometryNode != None:
-            geometryNode["lodNumber"] = lod_number
+            geometryNode.LodNumber = lod_number
 
         if metadataNode == None and hierarchyNode == None and geometryNode == None and len(error_messages) == 0:
             pass
         else:
-            data = {'model_id': self.model_id, 'hierarchyNode': hierarchyNode, 'metadataNode': metadataNode, 'geometryNode': geometryNode, 'errors': error_messages, 'done': False }
-            self.redis_client.Publish(data, verbose=False)
+            try:
+                NodeMessage = PNodeMessage()
+                NodeMessage.ModelID = int(self.model_id)
+                NodeMessage.Errors.extend(error_messages)
+                NodeMessage.Done = False
+                
+                if hierarchyNode != None:
+                    NodeMessage.HierarchyNode.UniqueID = hierarchyNode.UniqueID
+                    NodeMessage.HierarchyNode.ParentID = hierarchyNode.ParentID
+                    NodeMessage.HierarchyNode.MetadataID = hierarchyNode.MetadataID
+                    NodeMessage.HierarchyNode.GeometryParts.extend(hierarchyNode.GeometryParts)
+                    NodeMessage.HierarchyNode.ChildNodes.extend(hierarchyNode.ChildNodes)
+                
+                if metadataNode != None:
+                    NodeMessage.MetadataNode.UniqueID = metadataNode.UniqueID
+                    NodeMessage.MetadataNode.Metadata = metadataNode.Metadata
+                
+                if geometryNode != None:
+                    NodeMessage.GeometryNode.UniqueID = geometryNode.UniqueID
+                    NodeMessage.GeometryNode.LODs.extend(geometryNode.LODs)
+
+                self.redis_client.Publish(NodeMessage, verbose=False)
+            except Exception as e:
+                Logger().Error(f"=====> Redis Publish Error {e}")

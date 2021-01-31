@@ -1,3 +1,4 @@
+from .protobuf_messages_pb2 import *
 from .geometry_parts import GeometryParts
 from .logger import Logger
 from .utils import Utils
@@ -17,18 +18,18 @@ class HierarchyNode:
         if Utils().BisectSearch(part_occurrences, occurrence):
             self.geometryParts = GeometryParts(occurrence, scale_factor).Get()
         else:
-            self.geometryParts = None
+            self.geometryParts = []
 
         self.childNodes = []
         for child in scene.getChildren(occurrence):
             child_hierarchy_id = core.getProperty(child, "hierarchy_id")
-            self.childNodes.append(child_hierarchy_id)
+            self.childNodes.append(int(child_hierarchy_id))
     
     def Get(self):
-        return {
-            'id': self.hierarchy_id, 
-            'parentId': self.parent_id, 
-            'metadataId': self.metadata_id, 
-            'geometryParts': self.geometryParts, 
-            'childNodes': self.childNodes
-        }
+        HierarchyNodeData = PHierarchyNode()
+        HierarchyNodeData.UniqueID = int(self.hierarchy_id)
+        HierarchyNodeData.ParentID = int(self.parent_id)
+        HierarchyNodeData.MetadataID = int(self.metadata_id)
+        HierarchyNodeData.GeometryParts.extend(self.geometryParts)
+        HierarchyNodeData.ChildNodes.extend(self.childNodes)
+        return HierarchyNodeData
