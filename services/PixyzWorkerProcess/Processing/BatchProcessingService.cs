@@ -300,8 +300,9 @@ namespace PixyzWorkerProcess.Processing
 
                 try
                 {
-                    byte[] MessageBytes = Convert.FromBase64String(Json);
-                    MemoryStream InputStream = new MemoryStream(MessageBytes);
+                    //byte[] MessageBytes = Convert.FromBase64String(Json);
+                    Google.Protobuf.ByteString MessageBytes = Google.Protobuf.ByteString.FromBase64(Json);
+                    /*MemoryStream InputStream = new MemoryStream(MessageBytes);
                     MemoryStream OutputStream = new MemoryStream();
 
                     using (DeflateStream decompressionStream = new DeflateStream(InputStream, CompressionMode.Decompress))
@@ -314,9 +315,9 @@ namespace PixyzWorkerProcess.Processing
                     //NodeMessage MessageReceived = JsonConvert.DeserializeObject<NodeMessage>(DecompressedMessage);
                     //NodeMessage MessageReceivedCompressCopy = JsonConvert.DeserializeObject<NodeMessage>(DecompressedMessage);
                     
-                    byte[] DecompressedArray = OutputStream.ToArray();
+                    byte[] DecompressedArray = OutputStream.ToArray();*/
 
-                    PNodeMessage ReceivedMessage = PNodeMessage.Parser.ParseFrom(DecompressedArray);
+                    PNodeMessage ReceivedMessage = PNodeMessage.Parser.ParseFrom(MessageBytes);
                     NodeMessage MessageReceived = ConvertNodeMessage(ReceivedMessage);
                     NodeMessage MessageReceivedCompressCopy = ConvertNodeMessage(ReceivedMessage);
 

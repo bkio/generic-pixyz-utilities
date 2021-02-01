@@ -1,8 +1,8 @@
 import redis
 import base64
-import zlib
+# import zlib
 import time
-import json
+# import json
 import sys
 from threading import Lock
 from .protobuf_messages_pb2 import *
@@ -42,8 +42,8 @@ class RedisClient:
 
     def DeflateEncodeBase64(self, message):
         # compressed_message = zlib.compress(bytes(message, 'utf-8'))[2:-4]
-        compressed_message = zlib.compress(message)[2:-4]
-        return base64.b64encode(compressed_message)
+        # compressed_message = zlib.compress(message)[2:-4]
+        return base64.b64encode(message)
 
     def Publish(self, data:PNodeMessage, verbose = True):
         """ 
@@ -59,7 +59,7 @@ class RedisClient:
         self.message_count = self.message_count + 1
 
         # message = json.dumps(data)
-        message = data.SerializeToString()
+        message = data.SerializePartialToString()
         
         base64_message = self.DeflateEncodeBase64(message)
 

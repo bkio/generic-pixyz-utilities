@@ -42,8 +42,8 @@ def StartModelProcess(_logger):
         #system_error_message = ImportFiles(models_folder_path="/app/models", zip_main_assembly_file_name_if_any=ZIP_MAIN_ASSEMBLY_FILE_NAME_IF_ANY).Run()
 
         files_with_path = []
-        files_with_path.append("C:/tmp/models/fbx/UI-18-8101.fbx")
-        # files_with_path.append("C:/tmp/models/fbx/OLOverall.fbx")
+        # files_with_path.append("C:/tmp/models/fbx/UI-18-8101.fbx")
+        files_with_path.append("C:/tmp/models/fbx/OLOverall.fbx")
         # files_with_path.append("C:/tmp/models/fbx/AREAQB.fbx")
 
         system_error_message = ImportFileList(files_with_path).Run()
