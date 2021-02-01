@@ -300,24 +300,19 @@ namespace PixyzWorkerProcess.Processing
 
                 try
                 {
-                    //byte[] MessageBytes = Convert.FromBase64String(Json);
-                    Google.Protobuf.ByteString MessageBytes = Google.Protobuf.ByteString.FromBase64(Json);
-                    /*MemoryStream InputStream = new MemoryStream(MessageBytes);
+                    byte[] MessageBytes = Convert.FromBase64String(Json);
+                    MemoryStream InputStream = new MemoryStream(MessageBytes);
                     MemoryStream OutputStream = new MemoryStream();
 
                     using (DeflateStream decompressionStream = new DeflateStream(InputStream, CompressionMode.Decompress))
                     {
                         decompressionStream.CopyTo(OutputStream);
                     }
-
-                    //string DecompressedMessage = Encoding.UTF8.GetString(OutputStream.ToArray());
-
-                    //NodeMessage MessageReceived = JsonConvert.DeserializeObject<NodeMessage>(DecompressedMessage);
-                    //NodeMessage MessageReceivedCompressCopy = JsonConvert.DeserializeObject<NodeMessage>(DecompressedMessage);
                     
-                    byte[] DecompressedArray = OutputStream.ToArray();*/
+                    byte[] DecompressedArray = OutputStream.ToArray();
 
-                    PNodeMessage ReceivedMessage = PNodeMessage.Parser.ParseFrom(MessageBytes);
+                    //Google.Protobuf.ByteString MessageBytes = Google.Protobuf.ByteString.FromBase64(Json);
+                    PNodeMessage ReceivedMessage = PNodeMessage.Parser.ParseFrom(DecompressedArray);
                     NodeMessage MessageReceived = ConvertNodeMessage(ReceivedMessage);
                     NodeMessage MessageReceivedCompressCopy = ConvertNodeMessage(ReceivedMessage);
 
@@ -384,10 +379,10 @@ namespace PixyzWorkerProcess.Processing
                 if (Message.GeometryNode != null)
                 {
 
-                    //AddItemToQueues(Message.GeometryNode, MessageCompressCopy.GeometryNode);
+                    AddItemToQueues(Message.GeometryNode, MessageCompressCopy.GeometryNode);
 
-                    MergeGeometry(GeometryNodeToAssemblePlain, Message.GeometryNode);
-                    MergeGeometry(GeometryNodeToAssembleCompressed, MessageCompressCopy.GeometryNode);
+                    //MergeGeometry(GeometryNodeToAssemblePlain, Message.GeometryNode);
+                    //MergeGeometry(GeometryNodeToAssembleCompressed, MessageCompressCopy.GeometryNode);
                 }
 
                 if (Message.MetadataNode != null)
@@ -411,15 +406,15 @@ namespace PixyzWorkerProcess.Processing
                     if (!QueueComplete)
                     {
                         _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Received End signal for {ExpectedMessageCount} messages");
-                        CompleteMerge(GeometryNodeToAssemblePlain);
-                        CompleteMerge(GeometryNodeToAssembleCompressed);
+                        //CompleteMerge(GeometryNodeToAssemblePlain);
+                        //CompleteMerge(GeometryNodeToAssembleCompressed);
 
-                        foreach (var Node in GeometryNodeToAssemblePlain)
-                        {
-                            //There should exist a copy of each message
-                            LodMessage Copy = GeometryNodeToAssembleCompressed[Node.Key];
-                            AddItemToQueues(Node.Value, Copy);
-                        }
+                        //foreach (var Node in GeometryNodeToAssemblePlain)
+                        //{
+                        //    //There should exist a copy of each message
+                        //    LodMessage Copy = GeometryNodeToAssembleCompressed[Node.Key];
+                        //    AddItemToQueues(Node.Value, Copy);
+                        //}
 
                         SignalQueuingComplete();
                     }
@@ -497,9 +492,9 @@ namespace PixyzWorkerProcess.Processing
             LodMessage _Node = new LodMessage();
             _Node.UniqueID = ProtoNode.UniqueID;
             _Node.LodNumber = ProtoNode.LodNumber;
-            if (ProtoNode.LODs.Count == 1)
+
+            foreach(var CurrentProtoLOD in ProtoNode.LODs)
             {
-                var CurrentProtoLOD = ProtoNode.LODs[0];
                 ServiceUtilities.Process.Geometry.LOD CurrentLOD = new ServiceUtilities.Process.Geometry.LOD();
                 CurrentLOD.VertexNormalTangentList = new List<ServiceUtilities.Process.Geometry.VertexNormalTangent>();
                 foreach (var Item in CurrentProtoLOD.VertexNormalTangentList)
@@ -524,8 +519,10 @@ namespace PixyzWorkerProcess.Processing
                 }
                 CurrentLOD.Indexes = new List<uint>();
                 CurrentLOD.Indexes.AddRange(CurrentProtoLOD.Indexes);
+
                 _Node.LODs.Add(CurrentLOD);
             }
+            _Node.LODs = _Node.LODs.OrderByDescending(x => x.Indexes.Count).ToList();
             return _Node;
         }
 

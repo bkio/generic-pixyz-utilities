@@ -1,6 +1,6 @@
 import redis
 import base64
-# import zlib
+import zlib
 import time
 # import json
 import sys
@@ -42,8 +42,8 @@ class RedisClient:
 
     def DeflateEncodeBase64(self, message):
         # compressed_message = zlib.compress(bytes(message, 'utf-8'))[2:-4]
-        # compressed_message = zlib.compress(message)[2:-4]
-        return base64.b64encode(message)
+        compressed_message = zlib.compress(message)[2:-4]
+        return base64.b64encode(compressed_message)
 
     def Publish(self, data:PNodeMessage, verbose = True):
         """ 
