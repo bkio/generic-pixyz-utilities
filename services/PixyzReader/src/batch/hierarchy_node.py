@@ -10,26 +10,24 @@ try:# Prevent IDE errors
 except: pass
 
 class HierarchyNode:
-    def __init__(self, part_occurrences, occurrence, parent_id, hierarchy_id, metadata_id, scale_factor = 1000):
+    def __init__(self, proto: PHierarchyNode, part_occurrences, occurrence, parent_id, hierarchy_id, metadata_id, scale_factor = 1000):
+        self.proto = proto
         self.parent_id = parent_id
         self.hierarchy_id = hierarchy_id
         self.metadata_id = metadata_id
         
         if Utils().BisectSearch(part_occurrences, occurrence):
-            self.geometryParts = GeometryParts(occurrence, scale_factor).Get()
-        else:
-            self.geometryParts = []
+            self.geometryParts = GeometryParts(self.proto, occurrence, scale_factor)
 
         self.childNodes = []
         for child in scene.getChildren(occurrence):
             child_hierarchy_id = core.getProperty(child, "hierarchy_id")
             self.childNodes.append(int(child_hierarchy_id))
+
+        self.proto.UniqueID = int(self.hierarchy_id)
+        self.proto.ParentID = int(self.parent_id)
+        self.proto.MetadataID = int(self.metadata_id)
+        self.proto.ChildNodes.extend(self.childNodes)
     
     def Get(self):
-        HierarchyNodeData = PHierarchyNode()
-        HierarchyNodeData.UniqueID = int(self.hierarchy_id)
-        HierarchyNodeData.ParentID = int(self.parent_id)
-        HierarchyNodeData.MetadataID = int(self.metadata_id)
-        HierarchyNodeData.GeometryParts.extend(self.geometryParts)
-        HierarchyNodeData.ChildNodes.extend(self.childNodes)
-        return HierarchyNodeData
+        return True

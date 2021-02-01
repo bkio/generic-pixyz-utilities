@@ -9,7 +9,8 @@ try:# Prevent IDE errors
 except: pass
 
 class MetadataNode:
-    def __init__(self, occurrence, metadata_id):
+    def __init__(self, proto: PMetadataNode, occurrence, metadata_id):
+        self.proto = proto
         self.metadata_obj = {}
         self.metadata_id = metadata_id
         # put name info as metadata before getting actual metadata information
@@ -26,10 +27,6 @@ class MetadataNode:
             Logger().Warning("=====> No metadata component found")
 
     def Get(self):
-        if self.metadata_obj == None:
-            return None
-        else:
-            metadata_message = PMetadataNode()
-            metadata_message.UniqueID = int(self.metadata_id)
-            metadata_message.Metadata = json.dumps(self.metadata_obj)
-            return metadata_message
+        self.proto.UniqueID = int(self.metadata_id)
+        self.proto.Metadata = json.dumps(self.metadata_obj)
+        return self.metadata_obj

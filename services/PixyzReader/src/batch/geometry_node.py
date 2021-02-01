@@ -10,8 +10,9 @@ try:# Prevent IDE errors
 except: pass
 
 class GeometryNode:
-    def __init__(self, thread_lock, occurrence, current_lod_level=0, target_strategy="ratio", decimate_value=0, small_object_threshold = 50, scale_factor = 1000):
+    def __init__(self, proto: PGeometryNode, thread_lock, occurrence, current_lod_level=0, target_strategy="ratio", decimate_value=0, small_object_threshold = 50, scale_factor = 1000):
         #Parameters
+        self.proto = proto
         self.occurrence = occurrence
         self.small_object_threshold = small_object_threshold
         self.scale_factor = scale_factor
@@ -36,14 +37,17 @@ class GeometryNode:
             Logger().Error(f"=====> GeometryMesh DecimateTarget Error {e}")
 
         try:
-            lod_info, error_message_lod = GeometryMesh(lod_mesh, self.small_object_threshold, self.scale_factor).Get()
-
-            self.geometry_node = PGeometryNode()
-            self.geometry_node.UniqueID = int(occurrence_id)
-            self.geometry_node.LODs.append(lod_info)
+            self.proto.UniqueID = int(occurrence_id)
+            self.proto.LodNumber = self.current_lod_level
+            proto_lod = self.proto.LODs.add()
+            lod_info, error_message_lod = GeometryMesh(proto_lod, lod_mesh, self.small_object_threshold, self.scale_factor).Get()
+            # self.geometry_node.LODs.append(lod_info)
 
             if error_message_lod:
                 self.error_messages.append(error_message_lod)
+
+            if lod_info != None:
+                self.geometry_node = 1
         except Exception as e:
             Logger().Error(f"=====> GeometryMesh Error {e}")
             self.error_messages.append(e)

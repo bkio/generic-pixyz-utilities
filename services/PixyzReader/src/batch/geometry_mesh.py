@@ -8,15 +8,16 @@ try:# Prevent IDE errors
 except: pass
 
 class GeometryMesh:
-    def __init__(self, lod_mesh, small_object_threshold = 50, scale_factor = 1000):
+    def __init__(self, proto: PLOD, lod_mesh, small_object_threshold = 50, scale_factor = 1000):
         #Parameters
+        self.proto = proto
         self.lod_mesh = lod_mesh
         self.small_object_threshold = small_object_threshold
         self.scale_factor = scale_factor
 
         #Returns
         self.error_message = None
-        self.lod_info = PLOD()
+        self.lod_info = None
 
         meshDefinition = polygonal.getMeshDefinition(self.lod_mesh)
 
@@ -44,28 +45,26 @@ class GeometryMesh:
         tangents = Vector3Array(meshTangents).Get()
         indexes = meshTriangles
 
-        if self.__IsSmallObject(vertices) == True:
-            self.lod_info = PLOD()
-        else:
-            vertexNormalTangentList = []
-            for i in range(vertices_len):
-                VNTData = PVertexNormalTangent()
-                VNTData.Vertex.X = vertices[i].X
-                VNTData.Vertex.Y = vertices[i].Y
-                VNTData.Vertex.Z = vertices[i].Z
+        # if self.__IsSmallObject(vertices) == True:
+        #     pass
+        # else:
+        self.proto.Indexes.extend(indexes)
+        for i in range(vertices_len):
+            vnt = self.proto.VertexNormalTangentList.add()
+            vnt.Vertex.X = vertices[i]["x"]
+            vnt.Vertex.Y = vertices[i]["y"]
+            vnt.Vertex.Z = vertices[i]["z"]
 
-                VNTData.Normal.X = normals[i].X
-                VNTData.Normal.Y = normals[i].Y
-                VNTData.Normal.Z = normals[i].Z
-                
-                VNTData.Tangent.X = tangents[i].X
-                VNTData.Tangent.Y = tangents[i].Y
-                VNTData.Tangent.Z = tangents[i].Z
-                vertexNormalTangentList.append(VNTData)
-
-            self.lod_info = PLOD()
-            self.lod_info.VertexNormalTangentList.extend(vertexNormalTangentList)
-            self.lod_info.Indexes.extend(indexes)
+            vnt.Normal.X = normals[i]["x"]
+            vnt.Normal.Y = normals[i]["y"]
+            vnt.Normal.Z = normals[i]["z"]
+            
+            vnt.Tangent.X = tangents[i]["x"]
+            vnt.Tangent.Y = tangents[i]["y"]
+            vnt.Tangent.Z = tangents[i]["z"]
+            
+        if len(indexes) > 0 and vertices_len > 0:
+            self.lod_info = 1
 
     def __IsSmallObject(self, vertices):
         if self.small_object_threshold <= 0:

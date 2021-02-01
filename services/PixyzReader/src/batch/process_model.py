@@ -48,12 +48,14 @@ class ProcessModel:
             self.lod_levels = [100]
 
         for current_lod in range(len(self.lod_levels)):
+            decimate_value = current_lod
+            
             if current_lod > 0:
-                decimate_value = current_lod
                 if self.decimate_target_strategy == "ratio":
                     decimate_value = math.ceil((self.lod_levels[current_lod]/self.lod_levels[current_lod-1]) * 100)
-                self.decimate_values.append(decimate_value)
-                # PixyzAlgorithms(verbose=True).DecimateTarget([], [self.decimate_target_strategy, decimate_value])
+            
+            self.decimate_values.append(decimate_value)
+            # PixyzAlgorithms(verbose=True).DecimateTarget([], [self.decimate_target_strategy, decimate_value])
         
         for current_lod in range(len(self.lod_levels)):
             if current_lod == 0:
@@ -138,20 +140,22 @@ class ProcessModel:
         metadata_id = None
         hierarchyNode = None
 
-        small_obj_threshold = self.small_object_threshold
+        NodeMessage = PNodeMessage()
+        NodeMessage.ModelID = int(self.model_id)
+        NodeMessage.Done = False
 
         if int(lod_number) == 0:
-            small_obj_threshold = 0
             metadata_id = str(random.getrandbits(64))
+
             try:
-                metadataNode = MetadataNode(occurrence, metadata_id).Get()
+                metadataNode = MetadataNode(NodeMessage.MetadataNode, occurrence, metadata_id).Get()
                 if metadataNode == None:
                     metadata_id = None
             except Exception as e:
                 Logger().Error(f"=====> MetadataNode Error {e}")
 
             try:
-                hierarchyNode = HierarchyNode(self.part_occurrences, occurrence, parent_id, hierarchy_id, metadata_id, self.scale_factor).Get()
+                hierarchyNode = HierarchyNode(NodeMessage.HierarchyNode, self.part_occurrences, occurrence, parent_id, hierarchy_id, metadata_id, self.scale_factor).Get()
             except Exception as e:
                 Logger().Error(f"=====> HierarchyNode Error {e}")
 
@@ -161,37 +165,16 @@ class ProcessModel:
             thread_lock = self.redis_client.GetLock()
             current_decimate_value = self.decimate_values[lod_number]
             try:
-                geometryNode, error_messages = GeometryNode(thread_lock, occurrence, lod_number, self.decimate_target_strategy, current_decimate_value, small_obj_threshold, self.scale_factor).Get()
+                geometryNode, error_messages = GeometryNode(NodeMessage.GeometryNode, thread_lock, occurrence, lod_number, self.decimate_target_strategy, current_decimate_value, self.small_object_threshold, self.scale_factor).Get()
             except Exception as e:
                 Logger().Error(f"=====> GeometryNode Error {e}")
 
-        if geometryNode != None:
-            geometryNode.LodNumber = lod_number
+        NodeMessage.Errors.extend(error_messages)
 
         if metadataNode == None and hierarchyNode == None and geometryNode == None and len(error_messages) == 0:
             pass
         else:
             try:
-                NodeMessage = PNodeMessage()
-                NodeMessage.ModelID = int(self.model_id)
-                NodeMessage.Errors.extend(error_messages)
-                NodeMessage.Done = False
-                
-                if hierarchyNode != None:
-                    NodeMessage.HierarchyNode.UniqueID = hierarchyNode.UniqueID
-                    NodeMessage.HierarchyNode.ParentID = hierarchyNode.ParentID
-                    NodeMessage.HierarchyNode.MetadataID = hierarchyNode.MetadataID
-                    NodeMessage.HierarchyNode.GeometryParts.extend(hierarchyNode.GeometryParts)
-                    NodeMessage.HierarchyNode.ChildNodes.extend(hierarchyNode.ChildNodes)
-                
-                if metadataNode != None:
-                    NodeMessage.MetadataNode.UniqueID = metadataNode.UniqueID
-                    NodeMessage.MetadataNode.Metadata = metadataNode.Metadata
-                
-                if geometryNode != None:
-                    NodeMessage.GeometryNode.UniqueID = geometryNode.UniqueID
-                    NodeMessage.GeometryNode.LODs.extend(geometryNode.LODs)
-
                 self.redis_client.Publish(NodeMessage, verbose=False)
             except Exception as e:
                 Logger().Error(f"=====> Redis Publish Error {e}")

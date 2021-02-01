@@ -81,7 +81,7 @@ namespace PixyzWorkerProcess.Processing
             }
             catch (Exception ex)
             {
-                _ErrorMessageAction?.Invoke($"{ex.Message}\n{ex.StackTrace}");
+                _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] {ex.Message}\n{ex.StackTrace}");
                 return false;
             }
         }
@@ -130,12 +130,12 @@ namespace PixyzWorkerProcess.Processing
                     }
                     else
                     {
-                        _ErrorMessageAction?.Invoke("Write Failed");
+                        _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy / MM / dd HH: mm:ss.fffff")}] Write Failed");
                     }
                 }
                 catch (Exception ex)
                 {
-                    _ErrorMessageAction?.Invoke($"{ex.Message}\n{ex.StackTrace}");
+                    _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] {ex.Message}\n{ex.StackTrace}");
                     //Just set the state, health checker should see this and take action
                     State = FAILED_STATE;
                 }
@@ -148,7 +148,7 @@ namespace PixyzWorkerProcess.Processing
             {
                 try
                 {
-                    _ErrorMessageAction?.Invoke("Start processing Queue");
+                    _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Start processing Queue");
                     Dictionary<ENodeType, StreamStruct> WriteStreams = CreateStreams(QueueCompressMode);
                     using (XStreamWriter Writer = new XStreamWriter(WriteStreams))
                     {
@@ -184,13 +184,13 @@ namespace PixyzWorkerProcess.Processing
                                 Thread.Sleep(10);
                             }
                         }
-                        _ErrorMessageAction?.Invoke("Closing Stream");
+                        _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Closing Stream");
                     }
-                    _ErrorMessageAction?.Invoke("Closed Stream");
+                    _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Closed Stream");
                 }
                 catch (Exception ex)
                 {
-                    _ErrorMessageAction?.Invoke($"{ex.Message}\n{ex.StackTrace}");
+                    _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] {ex.Message}\n{ex.StackTrace}");
                     State = FAILED_STATE;
                 }
 
@@ -258,7 +258,7 @@ namespace PixyzWorkerProcess.Processing
                 State = CompleteWrites(LogError);
                 if (State == SUCCESS_STATE)
                 {
-                    _ErrorMessageAction?.Invoke("Files are successfully written.");
+                    _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Files are successfully written.");
                 }
             }
 
@@ -267,7 +267,7 @@ namespace PixyzWorkerProcess.Processing
             {
                 if (State == SUCCESS_STATE && !IsFileWrite)
                 {
-                    _ErrorMessageAction?.Invoke($"Ending Pod : {NotifyDoneUrl}");
+                    _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Ending Pod : {NotifyDoneUrl}");
 
                     Thread.Sleep(30000);
                     Task<HttpResponseMessage> ResponseTask = Client.GetAsync(NotifyDoneUrl);
@@ -279,13 +279,13 @@ namespace PixyzWorkerProcess.Processing
                         Task<string> ContentReadTask = ResponseTask.Result.Content.ReadAsStringAsync();
                         ContentReadTask.Wait();
 
-                        _ErrorMessageAction?.Invoke($"{ContentReadTask.Result}");
+                        _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] {ContentReadTask.Result}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                _ErrorMessageAction?.Invoke($"Failed to end pod : {ex.Message}\n{ex.StackTrace}");
+                _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Failed to end pod : {ex.Message}\n{ex.StackTrace}");
                 State = FAILED_STATE;
             }
         }
@@ -324,7 +324,7 @@ namespace PixyzWorkerProcess.Processing
                 }
                 catch (Exception ex)
                 {
-                    _ErrorMessageAction?.Invoke($"{ex.Message}\n{ex.StackTrace}");
+                    _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] {ex.Message}\n{ex.StackTrace}");
                 }
 
             });
@@ -367,7 +367,7 @@ namespace PixyzWorkerProcess.Processing
                 {
                     for (int i = 0; i < Message.Errors.Length; ++i)
                     {
-                        _ErrorMessageAction?.Invoke(Message.Errors[i]);
+                        _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Message.Error: {Message.Errors[i]}");
                     }
                 }
 
@@ -401,8 +401,7 @@ namespace PixyzWorkerProcess.Processing
                 ExpectedMessageCount = Message.MessageCount;
             }
 
-
-            _ErrorMessageAction?.Invoke($"Message Count: {QueuedMessageCount}");
+            _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Message Count: {QueuedMessageCount}");
             //Check if Expected message count has been set
             if (ExpectedMessageCount != -1 && QueuedMessageCount >= ExpectedMessageCount)
             {
@@ -410,7 +409,7 @@ namespace PixyzWorkerProcess.Processing
                 {
                     if (!QueueComplete)
                     {
-                        _ErrorMessageAction?.Invoke($"Received End signal for {ExpectedMessageCount} messages");
+                        _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Received End signal for {ExpectedMessageCount} messages");
                         CompleteMerge(GeometryNodeToAssemblePlain);
                         CompleteMerge(GeometryNodeToAssembleCompressed);
 
@@ -539,7 +538,7 @@ namespace PixyzWorkerProcess.Processing
 
         private string CompleteWrites(Action<string> _ErrorMessageAction = null)
         {
-            _ErrorMessageAction?.Invoke("Writing files");
+            _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Writing files");
 
             try
             {
@@ -551,21 +550,21 @@ namespace PixyzWorkerProcess.Processing
                     }
                     catch (Exception ex)
                     {
-                        _ErrorMessageAction?.Invoke($"{ex.Message}\n{ex.StackTrace}");
+                        _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] {ex.Message}\n{ex.StackTrace}");
                     }
                 }
                 return SUCCESS_STATE;
             }
             catch (Exception ex)
             {
-                _ErrorMessageAction?.Invoke($"{ex.Message}\n{ex.StackTrace}");
+                _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] {ex.Message}\n{ex.StackTrace}");
                 return FAILED_STATE;
             }
         }
 
         private string UploadAllFiles(Action<string> _ErrorMessageAction = null)
         {
-            _ErrorMessageAction?.Invoke("Uploading files");
+            _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Uploading files");
             Task[] Tasks = new Task[WebRequests.Count];
             try
             {
@@ -582,7 +581,7 @@ namespace PixyzWorkerProcess.Processing
             }
             catch (Exception ex)
             {
-                _ErrorMessageAction?.Invoke($"{ex.Message}\n{ex.StackTrace}");
+                _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] {ex.Message}\n{ex.StackTrace}");
                 return FAILED_STATE;
             }
         }
