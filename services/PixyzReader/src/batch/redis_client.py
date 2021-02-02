@@ -5,7 +5,7 @@ import time
 # import json
 import sys
 from threading import Lock
-from .protobuf_messages_pb2 import *
+from .protobuf_messages_pb2 import PNodeMessage
 from .logger import Logger
 
 class RedisClient:
@@ -45,7 +45,7 @@ class RedisClient:
         compressed_message = zlib.compress(message)[2:-4]
         return base64.b64encode(compressed_message)
 
-    def Publish(self, data:PNodeMessage, verbose = True):
+    def Publish(self, data: PNodeMessage, verbose = True):
         """ 
         Publish json data to specified channel
 

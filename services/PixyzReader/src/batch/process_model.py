@@ -8,7 +8,7 @@ from .metadata_node import MetadataNode
 from .hierarchy_node import HierarchyNode
 from .geometry_node import GeometryNode
 from .pixyz_algorithms import PixyzAlgorithms
-from .protobuf_messages_pb2 import *
+from .protobuf_messages_pb2 import PNodeMessage
 
 import pxz
 try:# Prevent IDE errors

@@ -1,6 +1,6 @@
 from .logger import Logger
 from .vector3_array import Vector3Array
-from .protobuf_messages_pb2 import *
+from .protobuf_messages_pb2 import PLOD
 
 import pxz
 try:# Prevent IDE errors

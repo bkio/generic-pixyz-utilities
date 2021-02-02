@@ -2,7 +2,7 @@ import math
 from batch.pixyz_algorithms import PixyzAlgorithms
 from .geometry_mesh import GeometryMesh
 from .logger import Logger
-from .protobuf_messages_pb2 import *
+from .protobuf_messages_pb2 import PGeometryNode
 
 import pxz
 try:# Prevent IDE errors

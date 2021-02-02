@@ -1,6 +1,6 @@
 import json
 from .logger import Logger
-from .protobuf_messages_pb2 import *
+from .protobuf_messages_pb2 import PMetadataNode
 
 import pxz
 try:# Prevent IDE errors

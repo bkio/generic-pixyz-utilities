@@ -1,4 +1,4 @@
-from .protobuf_messages_pb2 import *
+from .protobuf_messages_pb2 import PHierarchyNode
 from .geometry_parts import GeometryParts
 from .logger import Logger
 from .utils import Utils
