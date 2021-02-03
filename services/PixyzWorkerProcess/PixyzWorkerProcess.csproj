@@ -20,7 +20,11 @@
   <Import Project="..\..\submodules\bfilesdk-dotnet\common\BFileSDK-Dotnet\BFileSDK-Dotnet.projitems" Label="Shared" />
 
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.14.0" />
+    <Compile Remove="Processing\Testing\MessageSelfSender.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Capnp.Net.Runtime" Version="1.3.118" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
@@ -34,6 +38,10 @@
     <ProjectReference Include="..\..\submodules\BDotNetFramework\Utilities\BCloudServiceUtilities\BCloudServiceUtilities.csproj" />
     <ProjectReference Include="..\..\submodules\BDotNetFramework\Utilities\BWebServiceUtilities-GC\BWebServiceUtilities-GC.csproj" />
     <ProjectReference Include="..\..\submodules\BDotNetFramework\Utilities\BWebServiceUtilities\BWebServiceUtilities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Processing\Testing\" />
   </ItemGroup>
 
 </Project>

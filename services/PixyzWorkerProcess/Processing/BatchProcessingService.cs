@@ -2,7 +2,6 @@
 using BCommonUtilities;
 using ServiceUtilities.Process.Procedure;
 using ServiceUtilities.Process.RandomAccessFile;
-using Newtonsoft.Json;
 using PixyzWorkerProcess.Processing.Models;
 using System;
 using System.Collections.Concurrent;
@@ -10,12 +9,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.IO.Compression;
 using System.Linq;
-using PixyzWorkerProcess.Processing.Protobufs;
+using CapnpGen;
+using Capnp;
 
 namespace PixyzWorkerProcess.Processing
 {
@@ -308,13 +307,18 @@ namespace PixyzWorkerProcess.Processing
                     {
                         decompressionStream.CopyTo(OutputStream);
                     }
-                    
-                    byte[] DecompressedArray = OutputStream.ToArray();
 
-                    //Google.Protobuf.ByteString MessageBytes = Google.Protobuf.ByteString.FromBase64(Json);
-                    PNodeMessage ReceivedMessage = PNodeMessage.Parser.ParseFrom(DecompressedArray);
-                    NodeMessage MessageReceived = ConvertNodeMessage(ReceivedMessage);
-                    NodeMessage MessageReceivedCompressCopy = ConvertNodeMessage(ReceivedMessage);
+                    OutputStream.Seek(0, SeekOrigin.Begin);
+
+                    //byte[] DecompressedArray = OutputStream.ToArray();
+
+                    //PNodeMessage ReceivedMessage = PNodeMessage.Parser.ParseFrom(DecompressedArray);
+                    var frame = Framing.ReadSegments(OutputStream);
+                    var deserializer = DeserializerState.CreateRoot(frame);
+                    var reader = new CPNodeMessage.READER(deserializer);
+
+                    NodeMessage MessageReceived = ConvertNodeMessage(reader);
+                    NodeMessage MessageReceivedCompressCopy = ConvertNodeMessage(reader);
 
                     AddMessage(MessageReceived, MessageReceivedCompressCopy, _ErrorMessageAction);
                 }
@@ -379,10 +383,10 @@ namespace PixyzWorkerProcess.Processing
                 if (Message.GeometryNode != null)
                 {
 
-                    AddItemToQueues(Message.GeometryNode, MessageCompressCopy.GeometryNode);
+                    //AddItemToQueues(Message.GeometryNode, MessageCompressCopy.GeometryNode);
 
-                    //MergeGeometry(GeometryNodeToAssemblePlain, Message.GeometryNode);
-                    //MergeGeometry(GeometryNodeToAssembleCompressed, MessageCompressCopy.GeometryNode);
+                    MergeGeometry(GeometryNodeToAssemblePlain, Message.GeometryNode);
+                    MergeGeometry(GeometryNodeToAssembleCompressed, MessageCompressCopy.GeometryNode);
                 }
 
                 if (Message.MetadataNode != null)
@@ -406,15 +410,15 @@ namespace PixyzWorkerProcess.Processing
                     if (!QueueComplete)
                     {
                         _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Received End signal for {ExpectedMessageCount} messages");
-                        //CompleteMerge(GeometryNodeToAssemblePlain);
-                        //CompleteMerge(GeometryNodeToAssembleCompressed);
+                        CompleteMerge(GeometryNodeToAssemblePlain);
+                        CompleteMerge(GeometryNodeToAssembleCompressed);
 
-                        //foreach (var Node in GeometryNodeToAssemblePlain)
-                        //{
-                        //    //There should exist a copy of each message
-                        //    LodMessage Copy = GeometryNodeToAssembleCompressed[Node.Key];
-                        //    AddItemToQueues(Node.Value, Copy);
-                        //}
+                        foreach (var Node in GeometryNodeToAssemblePlain)
+                        {
+                            //There should exist a copy of each message
+                            LodMessage Copy = GeometryNodeToAssembleCompressed[Node.Key];
+                            AddItemToQueues(Node.Value, Copy);
+                        }
 
                         SignalQueuingComplete();
                     }
@@ -422,115 +426,72 @@ namespace PixyzWorkerProcess.Processing
             }
         }
 
-        public NodeMessage ConvertNodeMessage(PNodeMessage ProtoMessage)
+        public NodeMessage ConvertNodeMessage(CPNodeMessage.READER MessageReader)
         {
             NodeMessage _Message = new NodeMessage();
-            _Message.Done = ProtoMessage.Done;
-            _Message.ModelID = ProtoMessage.ModelID;
-            _Message.MessageCount = ProtoMessage.MessageCount;
-            _Message.Errors = ProtoMessage.Errors.ToArray<string>();
-            if(ProtoMessage.HierarchyNode != null)
-            {
-                _Message.HierarchyNode = ConvertNodeH(ProtoMessage.HierarchyNode);
-            }
-            if(ProtoMessage.GeometryNode != null)
-            {
-                _Message.GeometryNode = ConvertNodeG(ProtoMessage.GeometryNode);
-            }
-            if(ProtoMessage.MetadataNode != null)
-            {
-                _Message.MetadataNode = ConvertNodeM(ProtoMessage.MetadataNode);
-            }
+            _Message.Done = MessageReader.Done;
+            _Message.ModelID = MessageReader.ModelID;
+            _Message.MessageCount = MessageReader.MessageCount;
+            _Message.Errors = MessageReader.Errors.ToArray<string>();
+            _Message.HierarchyNode = ConvertNodeH(MessageReader.HierarchyNode);
+            _Message.GeometryNode = ConvertNodeG(MessageReader.GeometryNode);
+            _Message.MetadataNode = ConvertNodeM(MessageReader.MetadataNode);
             return _Message;
         }
 
-        public HierarchyNode ConvertNodeH(PHierarchyNode ProtoNode)
+        public HierarchyNode ConvertNodeH(CPHierarchyNode.READER CapnProtoNode)
         {
             HierarchyNode _Node = new HierarchyNode();
-            _Node.UniqueID = ProtoNode.UniqueID;
-            _Node.ParentID = ProtoNode.ParentID;
-            _Node.MetadataID = ProtoNode.MetadataID;
+            _Node.UniqueID = CapnProtoNode.UniqueID;
+            _Node.ParentID = CapnProtoNode.ParentID;
+            _Node.MetadataID = CapnProtoNode.MetadataID;
             _Node.GeometryParts = new List<HierarchyNode.GeometryPart>();
-            if (ProtoNode.GeometryParts.Count > 0)
+            if (CapnProtoNode.GeometryParts.Count > 0)
             {
-                foreach (var Item in ProtoNode.GeometryParts)
+                foreach (var Item in CapnProtoNode.GeometryParts)
                 {
                     var Part = new HierarchyNode.GeometryPart();
                     Part.GeometryID = Item.GeometryID;
-                    Part.Location = new ServiceUtilities.Process.Geometry.Vector3D();
-                    Part.Rotation = new ServiceUtilities.Process.Geometry.Vector3D();
-                    Part.Scale = new ServiceUtilities.Process.Geometry.Vector3D();
-                    Part.Color = new ServiceUtilities.Process.Geometry.Color();
-                    if (Item.Location != null)
-                    {
-                        Part.Location = new ServiceUtilities.Process.Geometry.Vector3D(Item.Location.X, Item.Location.Y, Item.Location.Z);
-                    }
-                    if (Item.Rotation != null)
-                    {
-                        Part.Rotation = new ServiceUtilities.Process.Geometry.Vector3D(Item.Rotation.X, Item.Rotation.Y, Item.Rotation.Z);
-                    }
-                    if (Item.Scale != null)
-                    {
-                        Part.Scale = new ServiceUtilities.Process.Geometry.Vector3D(Item.Scale.X, Item.Scale.Y, Item.Scale.Z);
-                    }
-                    if (Item.Color != null)
-                    {
-                        Part.Color = new ServiceUtilities.Process.Geometry.Color((byte)Item.Color.R, (byte)Item.Color.G, (byte)Item.Color.B);
-                    }
+                    Part.Location = new ServiceUtilities.Process.Geometry.Vector3D(Item.Location.X, Item.Location.Y, Item.Location.Z);
+                    Part.Rotation = new ServiceUtilities.Process.Geometry.Vector3D(Item.Rotation.X, Item.Rotation.Y, Item.Rotation.Z);
+                    Part.Scale = new ServiceUtilities.Process.Geometry.Vector3D(Item.Scale.X, Item.Scale.Y, Item.Scale.Z);
+                    Part.Color = new ServiceUtilities.Process.Geometry.Color((byte)Item.Color.R, (byte)Item.Color.G, (byte)Item.Color.B);
                     _Node.GeometryParts.Add(Part);
                 }
             }
-            if (ProtoNode.ChildNodes.Count > 0)
-            {
-                _Node.ChildNodes.AddRange(ProtoNode.ChildNodes);
-            }
+            _Node.ChildNodes.AddRange(CapnProtoNode.ChildNodes);
             return _Node;
         }
 
-        public LodMessage ConvertNodeG(PGeometryNode ProtoNode)
+        public LodMessage ConvertNodeG(CPGeometryNode.READER CapnProtoNode)
         {
             LodMessage _Node = new LodMessage();
-            _Node.UniqueID = ProtoNode.UniqueID;
-            _Node.LodNumber = ProtoNode.LodNumber;
+            _Node.UniqueID = CapnProtoNode.UniqueID;
+            _Node.LodNumber = CapnProtoNode.LodNumber;
 
-            foreach(var CurrentProtoLOD in ProtoNode.LODs)
+            var CurrentProtoLOD = CapnProtoNode.Lod;
+            ServiceUtilities.Process.Geometry.LOD CurrentLOD = new ServiceUtilities.Process.Geometry.LOD();
+            CurrentLOD.VertexNormalTangentList = new List<ServiceUtilities.Process.Geometry.VertexNormalTangent>();
+            foreach (var Item in CurrentProtoLOD.VertexNormalTangentList)
             {
-                ServiceUtilities.Process.Geometry.LOD CurrentLOD = new ServiceUtilities.Process.Geometry.LOD();
-                CurrentLOD.VertexNormalTangentList = new List<ServiceUtilities.Process.Geometry.VertexNormalTangent>();
-                foreach (var Item in CurrentProtoLOD.VertexNormalTangentList)
-                {
-                    var VertNormTang = new ServiceUtilities.Process.Geometry.VertexNormalTangent();
-                    VertNormTang.Vertex = new ServiceUtilities.Process.Geometry.Vector3D();
-                    VertNormTang.Normal = new ServiceUtilities.Process.Geometry.Vector3D();
-                    VertNormTang.Tangent = new ServiceUtilities.Process.Geometry.Vector3D();
-                    if (Item.Vertex != null)
-                    {
-                        VertNormTang.Vertex = new ServiceUtilities.Process.Geometry.Vector3D(Item.Vertex.X, Item.Vertex.Y, Item.Vertex.Z);
-                    }
-                    if (Item.Normal != null)
-                    {
-                        VertNormTang.Normal = new ServiceUtilities.Process.Geometry.Vector3D(Item.Normal.X, Item.Normal.Y, Item.Normal.Z);
-                    }
-                    if (Item.Tangent != null)
-                    {
-                        VertNormTang.Tangent = new ServiceUtilities.Process.Geometry.Vector3D(Item.Tangent.X, Item.Tangent.Y, Item.Tangent.Z);
-                    }
-                    CurrentLOD.VertexNormalTangentList.Add(VertNormTang);
-                }
-                CurrentLOD.Indexes = new List<uint>();
-                CurrentLOD.Indexes.AddRange(CurrentProtoLOD.Indexes);
-
-                _Node.LODs.Add(CurrentLOD);
+                var VertNormTang = new ServiceUtilities.Process.Geometry.VertexNormalTangent();
+                VertNormTang.Vertex = new ServiceUtilities.Process.Geometry.Vector3D(Item.Vertex.X, Item.Vertex.Y, Item.Vertex.Z);
+                VertNormTang.Normal = new ServiceUtilities.Process.Geometry.Vector3D(Item.Normal.X, Item.Normal.Y, Item.Normal.Z);
+                VertNormTang.Tangent = new ServiceUtilities.Process.Geometry.Vector3D(Item.Tangent.X, Item.Tangent.Y, Item.Tangent.Z);
+                CurrentLOD.VertexNormalTangentList.Add(VertNormTang);
             }
-            _Node.LODs = _Node.LODs.OrderByDescending(x => x.Indexes.Count).ToList();
+            CurrentLOD.Indexes = new List<uint>();
+            CurrentLOD.Indexes.AddRange(CurrentProtoLOD.Indexes);
+
+            _Node.LODs.Add(CurrentLOD);
             return _Node;
         }
 
-        public MetadataNode ConvertNodeM(PMetadataNode ProtoNode)
+        public MetadataNode ConvertNodeM(CPMetadataNode.READER CapnProtoNode)
         {
             MetadataNode _Node = new MetadataNode();
-            _Node.UniqueID = ProtoNode.UniqueID;
-            _Node.Metadata = ProtoNode.Metadata;
+            _Node.UniqueID = CapnProtoNode.UniqueID;
+            _Node.Metadata = CapnProtoNode.Metadata;
             return _Node;
         }
 

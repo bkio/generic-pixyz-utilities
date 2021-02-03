@@ -2,10 +2,10 @@ import redis
 import base64
 import zlib
 import time
+import capnpy
 # import json
 import sys
 from threading import Lock
-from .protobuf_messages_pb2 import PNodeMessage
 from .logger import Logger
 
 class RedisClient:
@@ -34,6 +34,11 @@ class RedisClient:
         #Message Count
         self.message_count = 0
 
+        self.capnproto = capnpy.load_schema(None, None, '../../Protobufs/capnproto_messages.capnp')
+
+    def GetCapnProto(self):
+        return self.capnproto
+        
     def GetLock(self):
         return self.thread_lock    
 
@@ -45,7 +50,7 @@ class RedisClient:
         compressed_message = zlib.compress(message)[2:-4]
         return base64.b64encode(compressed_message)
 
-    def Publish(self, data: PNodeMessage, verbose = True):
+    def Publish(self, data, verbose = True):
         """ 
         Publish json data to specified channel
 
@@ -58,8 +63,9 @@ class RedisClient:
         """
         self.message_count = self.message_count + 1
 
-        # message = json.dumps(data)
-        message = data.SerializePartialToString()
+        # capnp_data = self.capnproto.CPNodeMessage(model_id=data['modelID'], errors=data['errors'], hierarchyNode=data['hierarchyNode'], metadataNode=data['metadataNode'], geometryNode=data['geometryNode'], done=data['done'], messageCount=data['messageCount'])
+        capnp_data = self.capnproto.CPNodeMessage(**data)
+        message = capnp_data.dumps()
         
         base64_message = self.DeflateEncodeBase64(message)
 
@@ -98,11 +104,15 @@ class RedisClient:
         """
         # data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': None, 'done': True, 'messageCount' : self.message_count }
         # self.Publish(data)
-        NodeMessage = PNodeMessage()
-        NodeMessage.ModelID = int(self.model_id)
-        NodeMessage.Done = True
-        NodeMessage.MessageCount = self.message_count
-        self.Publish(NodeMessage)
+        node_message = {}
+        node_message['model_id'] = int(self.model_id)
+        node_message['errors'] = []
+        node_message['hierarchy_node'] = None
+        node_message['metadata_node'] = None
+        node_message['geometry_node'] = None
+        node_message['done'] = True
+        node_message['message_count'] = self.message_count
+        self.Publish(node_message)
 
     def Error(self, error_messages = []):
         """ 
@@ -116,12 +126,15 @@ class RedisClient:
         """
         # data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': error_messages, 'done': True, 'messageCount' : self.message_count }
         # self.Publish(data)
-        NodeMessage = PNodeMessage()
-        NodeMessage.ModelID = int(self.model_id)
-        NodeMessage.Done = True
-        NodeMessage.Errors = self.error_messages
-        NodeMessage.MessageCount = self.message_count
-        self.Publish(NodeMessage)
+        node_message = {}
+        node_message['model_id'] = int(self.model_id)
+        node_message['errors'] = error_messages
+        node_message['hierarchy_node'] = None
+        node_message['metadata_node'] = None
+        node_message['geometry_node'] = None
+        node_message['done'] = True
+        node_message['message_count'] = self.message_count
+        self.Publish(node_message)
 
     def __GetRedisInstance(self):
         """ 

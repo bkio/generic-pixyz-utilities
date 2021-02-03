@@ -1,6 +1,6 @@
+import capnpy
 from .logger import Logger
 from .vector3_array import Vector3Array
-from .protobuf_messages_pb2 import PLOD
 
 import pxz
 try:# Prevent IDE errors
@@ -8,9 +8,9 @@ try:# Prevent IDE errors
 except: pass
 
 class GeometryMesh:
-    def __init__(self, proto: PLOD, lod_mesh, small_object_threshold = 50, scale_factor = 1000):
+    def __init__(self, capnproto, lod_mesh, small_object_threshold = 50, scale_factor = 1000):
         #Parameters
-        self.proto = proto
+        self.capnproto = capnproto
         self.lod_mesh = lod_mesh
         self.small_object_threshold = small_object_threshold
         self.scale_factor = scale_factor
@@ -45,26 +45,22 @@ class GeometryMesh:
         tangents = Vector3Array(meshTangents).Get()
         indexes = meshTriangles
 
-        # if self.__IsSmallObject(vertices) == True:
-        #     pass
-        # else:
-        self.proto.Indexes.extend(indexes)
-        for i in range(vertices_len):
-            vnt = self.proto.VertexNormalTangentList.add()
-            vnt.Vertex.X = vertices[i]["x"]
-            vnt.Vertex.Y = vertices[i]["y"]
-            vnt.Vertex.Z = vertices[i]["z"]
-
-            vnt.Normal.X = normals[i]["x"]
-            vnt.Normal.Y = normals[i]["y"]
-            vnt.Normal.Z = normals[i]["z"]
-            
-            vnt.Tangent.X = tangents[i]["x"]
-            vnt.Tangent.Y = tangents[i]["y"]
-            vnt.Tangent.Z = tangents[i]["z"]
-            
-        if len(indexes) > 0 and vertices_len > 0:
-            self.lod_info = 1
+        if self.__IsSmallObject(vertices) == True:
+            pass
+        else:
+            self.lod_info = {}
+            vnt_list = []
+            for i in range(vertices_len):
+                vnt = {}
+                vnt["vertex"] = self.capnproto.CPVector3D(**vertices[i])
+                vnt["normal"] = self.capnproto.CPVector3D(**normals[i])
+                vnt["tangent"] = self.capnproto.CPVector3D(**tangents[i])
+                vnt_list.append(self.capnproto.CPVertexNormalTangent(**vnt))
+                
+            if vertices_len > 0:
+                self.lod_info["vertex_normal_tangent_list"] = vnt_list
+            if len(indexes) > 0:
+                self.lod_info["indexes"] = indexes
 
     def __IsSmallObject(self, vertices):
         if self.small_object_threshold <= 0:
@@ -96,9 +92,9 @@ class GeometryMesh:
                 bbmin['z'] = vertices[i]['z']
             i += 1
 
-        x = bbmax['x'] - bbmin['x']
-        y = bbmax['y'] - bbmin['y']
-        z = bbmax['z'] - bbmin['z']
+        x = (bbmax['x'] - bbmin['x']) * self.scale_factor
+        y = (bbmax['y'] - bbmin['y']) * self.scale_factor
+        z = (bbmax['z'] - bbmin['z']) * self.scale_factor
 
         if x < self.small_object_threshold and y < self.small_object_threshold and z < self.small_object_threshold:
             return True
@@ -106,4 +102,7 @@ class GeometryMesh:
         return False
 
     def Get(self):
-        return [self.lod_info, self.error_message]
+        if self.lod_info == None:
+            return [self.lod_info, self.error_message]
+        else:
+            return [self.capnproto.CPLOD(**self.lod_info), self.error_message]

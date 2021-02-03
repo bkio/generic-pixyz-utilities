@@ -37,8 +37,8 @@ class Logger:
         total_vertexNormalTangentList = 0
         total_indexes = 0
 
-        done = data.Done
-        errors = data.Errors
+        done = data['done']
+        errors = data['errors']
         error_count = 0
         if errors is not None:
             error_count = len(errors)

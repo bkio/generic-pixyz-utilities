@@ -1,6 +1,6 @@
+import capnpy
 import json
 from .logger import Logger
-from .protobuf_messages_pb2 import PMetadataNode
 
 import pxz
 try:# Prevent IDE errors
@@ -9,8 +9,8 @@ try:# Prevent IDE errors
 except: pass
 
 class MetadataNode:
-    def __init__(self, proto: PMetadataNode, occurrence, metadata_id):
-        self.proto = proto
+    def __init__(self, capnproto, occurrence, metadata_id):
+        self.capnproto = capnproto
         self.metadata_obj = {}
         self.metadata_id = metadata_id
         # put name info as metadata before getting actual metadata information
@@ -27,6 +27,11 @@ class MetadataNode:
             Logger().Warning("=====> No metadata component found")
 
     def Get(self):
-        self.proto.UniqueID = int(self.metadata_id)
-        self.proto.Metadata = json.dumps(self.metadata_obj)
-        return self.metadata_obj
+        if self.metadata_obj != None:
+            metadata_node = {}
+            metadata_node["unique_id"] = int(self.metadata_id)
+            metadata_str = json.dumps(self.metadata_obj)
+            metadata_node["metadata"] = bytes(metadata_str, 'utf-8')
+            return self.capnproto.CPMetadataNode(**metadata_node)
+        else:
+            return self.capnproto.CPMetadataNode()
