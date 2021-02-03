@@ -5,6 +5,7 @@ from batch.unzip_files import UnzipFiles
 from batch.download_files import DownloadFiles
 from batch.import_files import ImportFiles
 from batch.import_file_list import ImportFileList
+from batch.import_scene import ImportScene
 from batch.health_check import HealthCheck
 from batch.logger import Logger
 from batch.redis_client import RedisClient

@@ -233,7 +233,7 @@ class PixyzAlgorithms():
         if self.verbose:
             Logger('after makeInstanceUnique').PrintModelInfo(self.root)
 
-    def CreateInstancesBySimilarity(self, occurrences = [], dimensionsSimilarity = 0.999, polycountSimilarity = 0.999, ignoreSymmetry = True, keepExistingPrototypes = False, createNewOccurrencesForPrototypes = False):
+    def CreateInstancesBySimilarity(self, occurrences = [], dimensionsSimilarity = 0.999, polycountSimilarity = 0.999, ignoreSymmetry = False, keepExistingPrototypes = False, createNewOccurrencesForPrototypes = False):
         """
         Create instances when there are similar parts.\n
         This can be used to repair instances or to simplify a model that has similar parts that could be instanciated instead to reduce the number of unique meshes (reduces drawcalls, GPU memory usage and file size).\n
