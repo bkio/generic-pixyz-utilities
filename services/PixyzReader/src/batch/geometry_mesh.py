@@ -17,7 +17,6 @@ class GeometryMesh:
 
         #Returns
         self.error_message = None
-        self.lod_info = None
 
         meshDefinition = polygonal.getMeshDefinition(self.lod_mesh)
 
@@ -45,26 +44,23 @@ class GeometryMesh:
         tangents = Vector3Array(meshTangents).Get()
         indexes = meshTriangles
 
-        # if self.__IsSmallObject(vertices) == True:
-        #     pass
-        # else:
-        self.proto.Indexes.extend(indexes)
-        for i in range(vertices_len):
-            vnt = self.proto.VertexNormalTangentList.add()
-            vnt.Vertex.X = vertices[i]["x"]
-            vnt.Vertex.Y = vertices[i]["y"]
-            vnt.Vertex.Z = vertices[i]["z"]
+        if self.__IsSmallObject(vertices) == True:
+            pass
+        else:
+            self.proto.Indexes.extend(indexes)
+            for i in range(vertices_len):
+                vnt = self.proto.VertexNormalTangentList.add()
+                vnt.Vertex.X = vertices[i]["x"]
+                vnt.Vertex.Y = vertices[i]["y"]
+                vnt.Vertex.Z = vertices[i]["z"]
 
-            vnt.Normal.X = normals[i]["x"]
-            vnt.Normal.Y = normals[i]["y"]
-            vnt.Normal.Z = normals[i]["z"]
-            
-            vnt.Tangent.X = tangents[i]["x"]
-            vnt.Tangent.Y = tangents[i]["y"]
-            vnt.Tangent.Z = tangents[i]["z"]
-            
-        if len(indexes) > 0 and vertices_len > 0:
-            self.lod_info = 1
+                vnt.Normal.X = normals[i]["x"]
+                vnt.Normal.Y = normals[i]["y"]
+                vnt.Normal.Z = normals[i]["z"]
+                
+                vnt.Tangent.X = tangents[i]["x"]
+                vnt.Tangent.Y = tangents[i]["y"]
+                vnt.Tangent.Z = tangents[i]["z"]
 
     def __IsSmallObject(self, vertices):
         if self.small_object_threshold <= 0:
@@ -96,9 +92,9 @@ class GeometryMesh:
                 bbmin['z'] = vertices[i]['z']
             i += 1
 
-        x = bbmax['x'] - bbmin['x']
-        y = bbmax['y'] - bbmin['y']
-        z = bbmax['z'] - bbmin['z']
+        x = (bbmax['x'] - bbmin['x']) * self.scale_factor
+        y = (bbmax['y'] - bbmin['y']) * self.scale_factor
+        z = (bbmax['z'] - bbmin['z']) * self.scale_factor
 
         if x < self.small_object_threshold and y < self.small_object_threshold and z < self.small_object_threshold:
             return True
@@ -106,4 +102,4 @@ class GeometryMesh:
         return False
 
     def Get(self):
-        return [self.lod_info, self.error_message]
+        return self.error_message

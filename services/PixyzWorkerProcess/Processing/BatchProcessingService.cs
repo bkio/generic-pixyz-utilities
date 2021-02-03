@@ -379,10 +379,10 @@ namespace PixyzWorkerProcess.Processing
                 if (Message.GeometryNode != null)
                 {
 
-                    AddItemToQueues(Message.GeometryNode, MessageCompressCopy.GeometryNode);
+                    //AddItemToQueues(Message.GeometryNode, MessageCompressCopy.GeometryNode);
 
-                    //MergeGeometry(GeometryNodeToAssemblePlain, Message.GeometryNode);
-                    //MergeGeometry(GeometryNodeToAssembleCompressed, MessageCompressCopy.GeometryNode);
+                    MergeGeometry(GeometryNodeToAssemblePlain, Message.GeometryNode);
+                    MergeGeometry(GeometryNodeToAssembleCompressed, MessageCompressCopy.GeometryNode);
                 }
 
                 if (Message.MetadataNode != null)
@@ -406,15 +406,15 @@ namespace PixyzWorkerProcess.Processing
                     if (!QueueComplete)
                     {
                         _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Received End signal for {ExpectedMessageCount} messages");
-                        //CompleteMerge(GeometryNodeToAssemblePlain);
-                        //CompleteMerge(GeometryNodeToAssembleCompressed);
+                        CompleteMerge(GeometryNodeToAssemblePlain);
+                        CompleteMerge(GeometryNodeToAssembleCompressed);
 
-                        //foreach (var Node in GeometryNodeToAssemblePlain)
-                        //{
-                        //    //There should exist a copy of each message
-                        //    LodMessage Copy = GeometryNodeToAssembleCompressed[Node.Key];
-                        //    AddItemToQueues(Node.Value, Copy);
-                        //}
+                        foreach (var Node in GeometryNodeToAssemblePlain)
+                        {
+                            //There should exist a copy of each message
+                            LodMessage Copy = GeometryNodeToAssembleCompressed[Node.Key];
+                            AddItemToQueues(Node.Value, Copy);
+                        }
 
                         SignalQueuingComplete();
                     }
@@ -493,8 +493,9 @@ namespace PixyzWorkerProcess.Processing
             _Node.UniqueID = ProtoNode.UniqueID;
             _Node.LodNumber = ProtoNode.LodNumber;
 
-            foreach(var CurrentProtoLOD in ProtoNode.LODs)
+            if(ProtoNode.LODs.Count == 1)
             {
+                var CurrentProtoLOD = ProtoNode.LODs[0];
                 ServiceUtilities.Process.Geometry.LOD CurrentLOD = new ServiceUtilities.Process.Geometry.LOD();
                 CurrentLOD.VertexNormalTangentList = new List<ServiceUtilities.Process.Geometry.VertexNormalTangent>();
                 foreach (var Item in CurrentProtoLOD.VertexNormalTangentList)
@@ -522,7 +523,6 @@ namespace PixyzWorkerProcess.Processing
 
                 _Node.LODs.Add(CurrentLOD);
             }
-            _Node.LODs = _Node.LODs.OrderByDescending(x => x.Indexes.Count).ToList();
             return _Node;
         }
 

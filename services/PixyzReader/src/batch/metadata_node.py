@@ -26,7 +26,9 @@ class MetadataNode:
             self.metadata_obj = None
             Logger().Warning("=====> No metadata component found")
 
-    def Get(self):
         self.proto.UniqueID = int(self.metadata_id)
-        self.proto.Metadata = json.dumps(self.metadata_obj)
+        if self.metadata_obj !=None:
+            self.proto.Metadata = json.dumps(self.metadata_obj)
+
+    def Get(self):
         return self.metadata_obj

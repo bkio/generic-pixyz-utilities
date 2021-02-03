@@ -192,7 +192,7 @@ class PixyzAlgorithms():
         if self.verbose:
             Logger('after triangularize').PrintModelInfo(self.root)
 
-    def CreateNormals(self, occurrences = [], sharpEdge = -1.0, override = True, useAreaWeighting = False):
+    def CreateNormals(self, occurrences = [], sharpEdge = 35.0, override = True, useAreaWeighting = False):
         """
         Create normal attributes on tessellations
 
@@ -260,7 +260,7 @@ class PixyzAlgorithms():
         if self.verbose:
             Logger('after createInstancesBySimilarity').PrintModelInfo(self.root)
 
-    def Decimate(self, occurrences = [], surfacicTolerance = 3.0, lineicTolerance = -1, normalTolerance = 15.0, texCoordTolerance = -1, releaseConstraintOnSmallArea = False):
+    def Decimate(self, occurrences = [], surfacicTolerance = 3.0, lineicTolerance = -1, normalTolerance = 15.0, texCoordTolerance = -1, releaseConstraintOnSmallArea = True):
         """
         Reduce the polygon count by removing some vertices\n
         Function defaults are addressed Strong preset settings which means low triangle counts\n
@@ -285,6 +285,26 @@ class PixyzAlgorithms():
         if self.verbose:
             Logger('after decimate').PrintModelInfo(self.root)
     
+    def DecimateStrong(self, occurrences = []):
+        """
+        Reduce the polygon count by removing some vertices with medium preset settings which means medium triangle counts\n
+        surfacicTolerance = 1.0\n
+        lineicTolerance = -1\n
+        normalTolerance = 8.0\n
+        texCoordTolerance = -1\n
+        releaseConstraintOnSmallArea = False\n
+
+        - Parameters: \n
+            - occurrences (OccurrenceList) : Occurrences of components to process\n
+        - Returns:\n
+            - void\n
+
+        """
+        if len(occurrences) == 0:
+            occurrences = [self.root]
+
+        self.Decimate(occurrences, 3.0, -1, 15.0)
+    
     def DecimateMedium(self, occurrences = []):
         """
         Reduce the polygon count by removing some vertices with medium preset settings which means medium triangle counts\n
@@ -303,7 +323,7 @@ class PixyzAlgorithms():
         if len(occurrences) == 0:
             occurrences = [self.root]
 
-        self.Decimate(occurrences, 1.0, -1, 8.0, -1, False)
+        self.Decimate(occurrences, 1.0, -1, 8.0)
 
     def DecimateLow(self, occurrences = []):
         """
@@ -323,7 +343,7 @@ class PixyzAlgorithms():
         if len(occurrences) == 0:
             occurrences = [self.root]
 
-        self.Decimate(occurrences, 0.5, 0.1, 1.0, -1, False)
+        self.Decimate(occurrences, 0.5, 0.1, 1.0)
 
     def DecimateBest(self, occurrences = []):
         """
@@ -343,7 +363,7 @@ class PixyzAlgorithms():
         if len(occurrences) == 0:
             occurrences = [self.root]
 
-        self.Decimate(occurrences, 1.0, 0.1, 5.0, -1, False)
+        self.Decimate(occurrences, 1.0, 0.1, 5.0)
 
     def DecimateTarget(self, occurrences = [], targetStrategy = ["ratio", 75], boundaryWeight = 0.0, normalWeight = 1.0, UVWeight = 0.0, sharpNormalWeight = 0.0, UVSeamWeight = 0.0, forbidUVFoldovers = False, protectTopology = True):
         """
@@ -412,3 +432,28 @@ class PixyzAlgorithms():
 
         if self.verbose:
             Logger(f"after mergeFinalLevel").PrintModelInfo(self.root)
+
+    def SmartHidenRemoval(self, occurrences = [], level = 2, voxelSize = 4000, minimumCavityVolume = 1, resolution = 512, mode = 0, considerTransparentOpaque = False, adjacencyDepth = 1):
+        """
+         Delete parts, patches or polygons not viewed from a set of camera automatically generated
+
+        - Parameters: \n
+            - occurrences (OccurrenceList) : Occurrences of components to process\n
+            - level (SelectionLevel) : Level of parts to remove : Parts (0), Patches (1) or Polygons (2)\n
+            - voxelSize (Distance) : Size of the voxels in mm (smaller it is, more viewpoints there are)\n
+            - minimumCavityVolume (Volume) : Minimum volume of a cavity in cubic meter (smaller it is, more viewpoints there are)\n
+            - resolution (Int) : Resolution of the visibility viewer. VeryHigh=2048, High=1024, Medium=512, Low=256, VeryLow=128, etc.\n
+            - mode (SmartHiddenType) [optional] : Select where to place camera (all cavities (0), only outer (1) or only inner cavities (2))\n
+            - considerTransparentOpaque (Boolean) [optional] : If True, Parts, Patches or Polygons with a transparent appearance are considered as opaque\n
+            - adjacencyDepth (Int) [optional] : Mark neighbors polygons as visible\n
+        - Returns:\n
+            - void\n
+
+        """
+        if len(occurrences) == 0:
+            occurrences = [self.root]
+
+        algo.smartHiddenRemoval(occurrences, level, voxelSize, minimumCavityVolume, resolution, mode, considerTransparentOpaque, adjacencyDepth)
+
+        if self.verbose:
+            Logger(f"after smartHiddenRemoval").PrintModelInfo(self.root)

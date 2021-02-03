@@ -16,7 +16,7 @@ class HierarchyNode:
         self.hierarchy_id = hierarchy_id
         self.metadata_id = metadata_id
         
-        if Utils().BisectSearch(part_occurrences, occurrence):
+        if Utils().ForLoopSearch(part_occurrences, occurrence):
             self.geometryParts = GeometryParts(self.proto, occurrence, scale_factor)
 
         self.childNodes = []
@@ -28,6 +28,3 @@ class HierarchyNode:
         self.proto.ParentID = int(self.parent_id)
         self.proto.MetadataID = int(self.metadata_id)
         self.proto.ChildNodes.extend(self.childNodes)
-    
-    def Get(self):
-        return True
