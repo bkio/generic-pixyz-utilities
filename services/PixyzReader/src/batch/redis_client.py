@@ -55,7 +55,6 @@ class RedisClient:
             - void\n
         """
         self.message_count = self.message_count + 1
-
         
         message = json.dumps(data)
         base64_message = self.DeflateEncodeBase64(message)

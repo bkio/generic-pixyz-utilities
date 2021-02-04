@@ -8,6 +8,7 @@ except: pass
 
 class MetadataNode:
     def __init__(self, occurrence, metadata_id):
+        self.metadata_node = None
         self.metadata_obj = {}
         self.metadata_id = metadata_id
         # put name info as metadata before getting actual metadata information
@@ -19,11 +20,12 @@ class MetadataNode:
             for metadataDefinition in metadataDefinitionList:
                 for item in metadataDefinition:
                     self.metadata_obj[item.name] = item.value
+
+            self.metadata_node = {}
+            self.metadata_node['id'] = self.metadata_id
+            self.metadata_node['metadata'] = json.dumps(self.metadata_obj)
         except:
             Logger().Warning("=====> No metadata component found")
 
     def Get(self):
-        return {
-            'id': self.metadata_id,
-            'metadata' : json.dumps(self.metadata_obj)
-        }
+        return self.metadata_node

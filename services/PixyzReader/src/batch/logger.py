@@ -40,7 +40,7 @@ class Logger:
         done = data['done']
         errors = data['errors']
         error_count = 0
-        if errors is not None:
+        if errors != None:
             error_count = len(errors)
 
         if done:
@@ -48,7 +48,7 @@ class Logger:
         else:
             try:
                 geometryNode = data['geometryNode']
-                if geometryNode is not None:
+                if geometryNode != None:
                     lod = geometryNode['lods'][0]
                     lod_level = geometryNode['lodNumber']
                     id = geometryNode['id']

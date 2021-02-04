@@ -10,14 +10,12 @@ try:# Prevent IDE errors
 except: pass
 
 class GeometryNode:
-    def __init__(self, thread_lock, occurrence, current_lod_level=0, target_strategy="ratio", decimate_value=0, small_object_threshold = 50, scale_factor = 1000):
+    def __init__(self, thread_lock, occurrence, current_lod_level=0, small_object_threshold = 50, scale_factor = 1000):
         #Parameters
         self.occurrence = occurrence
         self.small_object_threshold = small_object_threshold
         self.scale_factor = scale_factor
         self.current_lod_level = current_lod_level
-        self.decimate_value = decimate_value
-        self.target_strategy = target_strategy
         self.thread_lock = thread_lock
         
         #Returns
@@ -29,20 +27,17 @@ class GeometryNode:
         lod_mesh = scene.getPartMesh(part)
 
         try:
-            self.thread_lock.acquire()
-            PixyzAlgorithms(verbose=False).DecimateTarget([self.occurrence], [self.target_strategy, self.decimate_value])
-            self.thread_lock.release()
-        except Exception as e:
-            Logger().Error(f"=====> GeometryMesh DecimateTarget Error {e}")
+            lod, error_message_lod = GeometryMesh(occurrence, lod_mesh, self.small_object_threshold, self.scale_factor).Get()
 
-        try:
-            lod, error_message_lod = GeometryMesh(lod_mesh, self.small_object_threshold, self.scale_factor).Get()
+            if lod == None:
+                self.geometry_node = None
+            else:
+                self.geometry_node = {}
+                self.geometry_node['id'] = occurrence_id
+                self.geometry_node['lodNumber'] = self.current_lod_level
+                self.geometry_node['lods'] = [ lod ]
 
-            self.geometry_node = {}
-            self.geometry_node['id'] = occurrence_id
-            self.geometry_node['lods'] = [ lod ]
-
-            if error_message_lod:
+            if error_message_lod != None:
                 self.error_messages.append(error_message_lod)
         except Exception as e:
             Logger().Error(f"=====> GeometryMesh Error {e}")

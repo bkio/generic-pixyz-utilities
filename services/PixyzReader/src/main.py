@@ -5,6 +5,7 @@ from batch.unzip_files import UnzipFiles
 from batch.download_files import DownloadFiles
 from batch.import_files import ImportFiles
 from batch.import_file_list import ImportFileList
+from batch.import_scene import ImportScene
 from batch.health_check import HealthCheck
 from batch.logger import Logger
 from batch.redis_client import RedisClient
@@ -37,21 +38,20 @@ def StartModelProcess(_logger):
     #system_error_message = UnzipFiles(zip_file="/app/file.zip", extract_location="/app/models").Run()
     
     if system_error_message == None:
-
         # Import Unzipped Files
         #system_error_message = ImportFiles(models_folder_path="/app/models", zip_main_assembly_file_name_if_any=ZIP_MAIN_ASSEMBLY_FILE_NAME_IF_ANY).Run()
 
         files_with_path = []
-        files_with_path.append("C:/tmp/models/fbx/UI-18-8101.fbx")
-        # files_with_path.append("C:/tmp/models/fbx/OLOverall.fbx")
+        # files_with_path.append("C:/tmp/models/fbx/UI-18-8101.fbx")
+        files_with_path.append("C:/tmp/models/fbx/OLOverall.fbx")
         # files_with_path.append("C:/tmp/models/fbx/AREAQB.fbx")
 
         system_error_message = ImportFileList(files_with_path).Run()
+        # system_error_message = ImportScene("C:/tmp/models/pxz/AV_EXP.pxz").Run()
 
         Logger("before operation").PrintModelInfo()
         # PixyzAlgorithms(verbose=True).RepairCAD()
         # PixyzAlgorithms(verbose=True).Tesellate()
-        PixyzAlgorithms(verbose=True).RepairMesh()
         # PixyzAlgorithms(verbose=True).ExplodePartByMaterials()
         # PixyzAlgorithms(verbose=True).DeletePatches()
         # PixyzAlgorithms(verbose=True).DeleteLines()
@@ -62,9 +62,9 @@ def StartModelProcess(_logger):
         # PixyzAlgorithms(verbose=True).CreateInstancesBySimilarity()
         PixyzAlgorithms(verbose=True).Triangularize()
         PixyzAlgorithms(verbose=True).CreateNormals()
-        PixyzAlgorithms(verbose=True).DecimateLow()
+        PixyzAlgorithms(verbose=True).RepairMesh()
 
-        _ModelProcess = ProcessModel(model_id, _RedisClient, number_of_thread = 20, decimate_target_strategy="ratio", lod_levels=[100, 90, 80, 60, 20, 10], small_object_threshold=0, scale_factor=1000)
+        _ModelProcess = ProcessModel(model_id, _RedisClient, number_of_thread = 20, decimate_target_strategy="ratio", lod_levels=[100, 90, 80, 60, 20, 10], small_object_threshold=[0, 0, 0, 0, 20, 40], scale_factor=1000)
         _ModelProcess.AddCustomInformation("hierarchy_id", None, True)
         _ModelProcess.Start()
     else:

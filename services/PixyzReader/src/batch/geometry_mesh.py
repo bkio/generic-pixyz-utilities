@@ -1,3 +1,4 @@
+from batch.pixyz_algorithms import PixyzAlgorithms
 from .logger import Logger
 from .vector3_array import Vector3Array
 
@@ -7,15 +8,16 @@ try:# Prevent IDE errors
 except: pass
 
 class GeometryMesh:
-    def __init__(self, lod_mesh, small_object_threshold = 50, scale_factor = 1000):
+    def __init__(self, occurrence, lod_mesh, small_object_threshold = 50, scale_factor = 1000):
         #Parameters
+        self.occurrence = occurrence
         self.lod_mesh = lod_mesh
         self.small_object_threshold = small_object_threshold
         self.scale_factor = scale_factor
 
         #Returns
         self.error_message = None
-        self.geometry_info = {}
+        self.geometry_info = None
 
         meshDefinition = polygonal.getMeshDefinition(self.lod_mesh)
 
@@ -44,9 +46,8 @@ class GeometryMesh:
         indexes = meshTriangles
 
         if self.__IsSmallObject(vertices) == True:
-            self.geometry_info = {}
-            self.geometry_info['vertexNormalTangentList'] = []
-            self.geometry_info['indexes'] = []
+            PixyzAlgorithms().DeleteOccurrences([occurrence])
+            self.geometry_info = None
         else:
             vertexNormalTangentList = []
             for i in range(vertices_len):
@@ -90,9 +91,9 @@ class GeometryMesh:
                 bbmin['z'] = vertices[i]['z']
             i += 1
 
-        x = bbmax['x'] - bbmin['x']
-        y = bbmax['y'] - bbmin['y']
-        z = bbmax['z'] - bbmin['z']
+        x = (bbmax['x'] - bbmin['x']) * self.scale_factor
+        y = (bbmax['y'] - bbmin['y']) * self.scale_factor
+        z = (bbmax['z'] - bbmin['z']) * self.scale_factor
 
         if x < self.small_object_threshold and y < self.small_object_threshold and z < self.small_object_threshold:
             return True
