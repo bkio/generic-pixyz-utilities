@@ -47,14 +47,14 @@ class ProcessModel:
     def Start(self):
         Logger().Warning("=====> Model processing has been started, please wait processing...")
         self.ApplyCustomInformations(self.root)
-        
-        self.part_occurrences = scene.getPartOccurrences(self.root)
-        self.prototype_parts = self.GetPrototypeParts()
 
         if len(self.lod_decimations) <= 0:
             self.lod_decimations = [-1]
         
         for current_lod in range(len(self.lod_decimations)):
+            self.part_occurrences = scene.getPartOccurrences(self.root)
+            self.prototype_parts = self.GetPrototypeParts()
+
             if current_lod == 0:
                 self.CreateWorkerItems(self.root, '18446744069414584320')
             else:
@@ -69,10 +69,12 @@ class ProcessModel:
         lod_decimation_value = self.lod_decimations[current_lod_level]
         if(type(lod_decimation_value) is list):
             if(len(lod_decimation_value) == 3):
+                Logger().Warning(f"=====> Applying DecimateToQuality algorithm to LOD{current_lod_level}...")
                 PixyzAlgorithms(verbose=True).Decimate([], lod_decimation_value[0], lod_decimation_value[1], lod_decimation_value[2])
             else:
                 Logger().Error(f"Wrong LOD information for LOD{current_lod_level}, please to be sure it is a list and contains 3 elements for surfaic, lineic and normal parameter ")
         else:
+            Logger().Warning(f"=====> Applying DecimateTarget algorithm with {self.decimate_target_strategy}:{lod_decimation_value} parameters to LOD{current_lod_level}...")
             PixyzAlgorithms(verbose=True).DecimateTarget([], [self.decimate_target_strategy, lod_decimation_value])
 
     def GetPrototypeParts(self):
