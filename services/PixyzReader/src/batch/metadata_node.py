@@ -1,6 +1,6 @@
 import json
 from .logger import Logger
-from .protobuf_messages_pb2 import PMetadataNode
+from .PB.protob_messages_pb2 import PMetadataNode
 
 import pxz
 try:# Prevent IDE errors
@@ -23,12 +23,7 @@ class MetadataNode:
                 for item in metadataDefinition:
                     self.metadata_obj[item.name] = item.value
         except:
-            self.metadata_obj = None
-            Logger().Warning("=====> No metadata component found")
+            pass
 
         self.proto.UniqueID = int(self.metadata_id)
-        if self.metadata_obj !=None:
-            self.proto.Metadata = json.dumps(self.metadata_obj)
-
-    def Get(self):
-        return self.metadata_obj
+        self.proto.Metadata = json.dumps(self.metadata_obj)

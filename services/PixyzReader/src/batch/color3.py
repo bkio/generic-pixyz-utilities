@@ -1,4 +1,4 @@
-from .protobuf_messages_pb2 import PGeometryPart
+from .PB.protob_messages_pb2 import PGeometryPart
 
 import pxz
 try:# Prevent IDE errors

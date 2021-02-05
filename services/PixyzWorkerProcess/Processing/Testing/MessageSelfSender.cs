@@ -1,7 +1,7 @@
 ﻿using BCloudServiceUtilities;
 using Google.Protobuf;
 using PixyzWorkerProcess.Processing.Models;
-using PixyzWorkerProcess.Processing.Protobufs;
+using PixyzWorkerProcess.Processing.PB;
 using ServiceUtilities.Process.RandomAccessFile;
 using System;
 using System.Collections.Generic;
@@ -225,11 +225,7 @@ namespace PixyzWorkerProcess.Processing.Testing
             _Message.Done = ProtoMessage.Done;
             _Message.ModelID = ProtoMessage.ModelID;
             _Message.MessageCount = ProtoMessage.MessageCount;
-
-            if (ProtoMessage.Errors != null)
-            {
-                _Message.Errors.AddRange(ProtoMessage.Errors);
-            }
+            _Message.Errors = ProtoMessage.Errors;
 
             if (ProtoMessage.HierarchyNode != null)
             {
@@ -322,7 +318,7 @@ namespace PixyzWorkerProcess.Processing.Testing
                 }
                 
                 CurrentLOD.Indexes.AddRange(CurrentProtoLOD.Indexes);
-                _Node.LODs.Add(CurrentLOD);
+                _Node.LOD = CurrentLOD;
             }
             return _Node;
         }

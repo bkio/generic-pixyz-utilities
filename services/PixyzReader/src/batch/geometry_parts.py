@@ -1,4 +1,4 @@
-from .protobuf_messages_pb2 import PHierarchyNode
+from .PB.protob_messages_pb2 import PHierarchyNode
 from .matrix4x4 import Matrix4x4
 from .vector3 import Vector3
 from .color3 import Color3

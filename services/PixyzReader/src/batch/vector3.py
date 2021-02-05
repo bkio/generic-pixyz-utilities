@@ -1,5 +1,5 @@
 
-from .protobuf_messages_pb2 import PGeometryPart
+from .PB.protob_messages_pb2 import PGeometryPart
 class Vector3:
     def __init__(self, proto: PGeometryPart, x, y, z):
         self.proto = proto

@@ -386,9 +386,6 @@ class PixyzAlgorithms():
         if len(occurrences) == 0:
             occurrences = [self.root]
         
-        if self.verbose:
-            Logger(f"before decimateTarget - {targetStrategy[0]}:{targetStrategy[1]}").PrintModelInfo(self.root)
-        
         algo.decimateTarget(occurrences, targetStrategy, boundaryWeight, normalWeight, UVWeight, sharpNormalWeight, UVSeamWeight, forbidUVFoldovers, protectTopology)
         
         if self.verbose:
@@ -457,3 +454,16 @@ class PixyzAlgorithms():
 
         if self.verbose:
             Logger(f"after smartHiddenRemoval").PrintModelInfo(self.root)
+
+    def DeleteOccurrences(self, occurrences = []):
+        """
+         Delete a list of occurrences
+
+        - Parameters: \n
+            - occurrences (OccurrenceList) : Occurrences to delete\n
+        - Returns:\n
+            - void\n
+
+        """
+        
+        scene.deleteOccurrences(occurrences)

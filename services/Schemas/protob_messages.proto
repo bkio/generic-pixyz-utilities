@@ -8,11 +8,11 @@
 
 // [START declaration]
 syntax = "proto3";
-package protobuf_messages;
+package pb;
 // [END declaration]
 
 // [START csharp_declaration]
-option csharp_namespace = "PixyzWorkerProcess.Processing.Protobufs";
+option csharp_namespace = "PixyzWorkerProcess.Processing.PB";
 // [END csharp_declaration]
 
 // [START messages]
@@ -75,12 +75,12 @@ message PMetadataNode {
 message PGeometryNode {
   uint64 UniqueID = 1;
   int32 LodNumber = 2;
-  repeated PLOD LODs = 3;
+  PLOD LOD = 3;
 }
 
 message PNodeMessage {
   uint64 ModelID = 1;
-  repeated string Errors = 2;
+  string Errors = 2;
   PHierarchyNode HierarchyNode = 3;
   PMetadataNode MetadataNode = 4;
   PGeometryNode GeometryNode = 5;

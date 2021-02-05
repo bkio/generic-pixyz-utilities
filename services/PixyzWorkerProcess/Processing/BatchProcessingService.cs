@@ -2,7 +2,6 @@
 using BCommonUtilities;
 using ServiceUtilities.Process.Procedure;
 using ServiceUtilities.Process.RandomAccessFile;
-using Newtonsoft.Json;
 using PixyzWorkerProcess.Processing.Models;
 using System;
 using System.Collections.Concurrent;
@@ -10,12 +9,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.IO.Compression;
 using System.Linq;
-using PixyzWorkerProcess.Processing.Protobufs;
+using PixyzWorkerProcess.Processing.PB;
 
 namespace PixyzWorkerProcess.Processing
 {
@@ -359,12 +357,9 @@ namespace PixyzWorkerProcess.Processing
         {
             if (!Message.Done)
             {
-                if (Message.Errors != null && Message.Errors.Length > 0)
+                if (Message.Errors != null && Message.Errors.Length > 2)
                 {
-                    for (int i = 0; i < Message.Errors.Length; ++i)
-                    {
-                        _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Message.Error: {Message.Errors[i]}");
-                    }
+                    _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Message.Errors: {Message.Errors}");
                 }
 
                 if (Message.HierarchyNode != null)
@@ -428,7 +423,7 @@ namespace PixyzWorkerProcess.Processing
             _Message.Done = ProtoMessage.Done;
             _Message.ModelID = ProtoMessage.ModelID;
             _Message.MessageCount = ProtoMessage.MessageCount;
-            _Message.Errors = ProtoMessage.Errors.ToArray<string>();
+            _Message.Errors = ProtoMessage.Errors;
             if(ProtoMessage.HierarchyNode != null)
             {
                 _Message.HierarchyNode = ConvertNodeH(ProtoMessage.HierarchyNode);
@@ -489,40 +484,38 @@ namespace PixyzWorkerProcess.Processing
 
         public LodMessage ConvertNodeG(PGeometryNode ProtoNode)
         {
+            if (ProtoNode.LOD == null)
+                return null;
+
             LodMessage _Node = new LodMessage();
             _Node.UniqueID = ProtoNode.UniqueID;
             _Node.LodNumber = ProtoNode.LodNumber;
 
-            if(ProtoNode.LODs.Count == 1)
+            ServiceUtilities.Process.Geometry.LOD CurrentLOD = new ServiceUtilities.Process.Geometry.LOD();
+            CurrentLOD.VertexNormalTangentList = new List<ServiceUtilities.Process.Geometry.VertexNormalTangent>();
+            foreach (var Item in ProtoNode.LOD.VertexNormalTangentList)
             {
-                var CurrentProtoLOD = ProtoNode.LODs[0];
-                ServiceUtilities.Process.Geometry.LOD CurrentLOD = new ServiceUtilities.Process.Geometry.LOD();
-                CurrentLOD.VertexNormalTangentList = new List<ServiceUtilities.Process.Geometry.VertexNormalTangent>();
-                foreach (var Item in CurrentProtoLOD.VertexNormalTangentList)
+                var VertNormTang = new ServiceUtilities.Process.Geometry.VertexNormalTangent();
+                VertNormTang.Vertex = new ServiceUtilities.Process.Geometry.Vector3D();
+                VertNormTang.Normal = new ServiceUtilities.Process.Geometry.Vector3D();
+                VertNormTang.Tangent = new ServiceUtilities.Process.Geometry.Vector3D();
+                if (Item.Vertex != null)
                 {
-                    var VertNormTang = new ServiceUtilities.Process.Geometry.VertexNormalTangent();
-                    VertNormTang.Vertex = new ServiceUtilities.Process.Geometry.Vector3D();
-                    VertNormTang.Normal = new ServiceUtilities.Process.Geometry.Vector3D();
-                    VertNormTang.Tangent = new ServiceUtilities.Process.Geometry.Vector3D();
-                    if (Item.Vertex != null)
-                    {
-                        VertNormTang.Vertex = new ServiceUtilities.Process.Geometry.Vector3D(Item.Vertex.X, Item.Vertex.Y, Item.Vertex.Z);
-                    }
-                    if (Item.Normal != null)
-                    {
-                        VertNormTang.Normal = new ServiceUtilities.Process.Geometry.Vector3D(Item.Normal.X, Item.Normal.Y, Item.Normal.Z);
-                    }
-                    if (Item.Tangent != null)
-                    {
-                        VertNormTang.Tangent = new ServiceUtilities.Process.Geometry.Vector3D(Item.Tangent.X, Item.Tangent.Y, Item.Tangent.Z);
-                    }
-                    CurrentLOD.VertexNormalTangentList.Add(VertNormTang);
+                    VertNormTang.Vertex = new ServiceUtilities.Process.Geometry.Vector3D(Item.Vertex.X, Item.Vertex.Y, Item.Vertex.Z);
                 }
-                CurrentLOD.Indexes = new List<uint>();
-                CurrentLOD.Indexes.AddRange(CurrentProtoLOD.Indexes);
-
-                _Node.LODs.Add(CurrentLOD);
+                if (Item.Normal != null)
+                {
+                    VertNormTang.Normal = new ServiceUtilities.Process.Geometry.Vector3D(Item.Normal.X, Item.Normal.Y, Item.Normal.Z);
+                }
+                if (Item.Tangent != null)
+                {
+                    VertNormTang.Tangent = new ServiceUtilities.Process.Geometry.Vector3D(Item.Tangent.X, Item.Tangent.Y, Item.Tangent.Z);
+                }
+                CurrentLOD.VertexNormalTangentList.Add(VertNormTang);
             }
+            CurrentLOD.Indexes = new List<uint>();
+            CurrentLOD.Indexes.AddRange(ProtoNode.LOD.Indexes);
+            _Node.LODs.Add(CurrentLOD);
             return _Node;
         }
 

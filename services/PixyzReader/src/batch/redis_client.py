@@ -5,7 +5,7 @@ import time
 # import json
 import sys
 from threading import Lock
-from .protobuf_messages_pb2 import PNodeMessage
+from .PB.protob_messages_pb2 import PNodeMessage
 from .logger import Logger
 
 class RedisClient:
@@ -117,7 +117,7 @@ class RedisClient:
         NodeMessage = PNodeMessage()
         NodeMessage.ModelID = int(self.model_id)
         NodeMessage.Done = True
-        NodeMessage.Errors = self.error_messages
+        NodeMessage.Errors = str(error_messages)
         NodeMessage.MessageCount = self.message_count
         self.Publish(NodeMessage)
 

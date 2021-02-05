@@ -1,6 +1,7 @@
+from .pixyz_algorithms import PixyzAlgorithms
 from .logger import Logger
 from .vector3_array import Vector3Array
-from .protobuf_messages_pb2 import PLOD
+from .PB.protob_messages_pb2 import PLOD
 
 import pxz
 try:# Prevent IDE errors
@@ -8,14 +9,16 @@ try:# Prevent IDE errors
 except: pass
 
 class GeometryMesh:
-    def __init__(self, proto: PLOD, lod_mesh, small_object_threshold = 50, scale_factor = 1000):
+    def __init__(self, proto: PLOD, occurrence, lod_mesh, small_object_threshold = 50, scale_factor = 1000):
         #Parameters
         self.proto = proto
+        self.occurrence = occurrence
         self.lod_mesh = lod_mesh
         self.small_object_threshold = small_object_threshold
         self.scale_factor = scale_factor
 
         #Returns
+        self.has_lod = True
         self.error_message = None
 
         meshDefinition = polygonal.getMeshDefinition(self.lod_mesh)
@@ -45,6 +48,8 @@ class GeometryMesh:
         indexes = meshTriangles
 
         if self.__IsSmallObject(vertices) == True:
+            PixyzAlgorithms().DeleteOccurrences([occurrence])
+            self.has_lod = False
             pass
         else:
             self.proto.Indexes.extend(indexes)
@@ -102,4 +107,4 @@ class GeometryMesh:
         return False
 
     def Get(self):
-        return self.error_message
+        return [self.has_lod, self.error_message]

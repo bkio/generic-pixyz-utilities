@@ -38,13 +38,12 @@ def StartModelProcess(_logger):
     #system_error_message = UnzipFiles(zip_file="/app/file.zip", extract_location="/app/models").Run()
     
     if system_error_message == None:
-
         # Import Unzipped Files
         #system_error_message = ImportFiles(models_folder_path="/app/models", zip_main_assembly_file_name_if_any=ZIP_MAIN_ASSEMBLY_FILE_NAME_IF_ANY).Run()
 
         files_with_path = []
-        files_with_path.append("C:/tmp/models/fbx/UI-18-8101.fbx")
-        # files_with_path.append("C:/tmp/models/fbx/OLOverall.fbx")
+        # files_with_path.append("C:/tmp/models/fbx/UI-18-8101.fbx")
+        files_with_path.append("C:/tmp/models/fbx/OLOverall.fbx")
         # files_with_path.append("C:/tmp/models/fbx/AREAQB.fbx")
 
         system_error_message = ImportFileList(files_with_path).Run()
@@ -65,7 +64,7 @@ def StartModelProcess(_logger):
         PixyzAlgorithms(verbose=True).RepairMesh()
 
         try:
-            _ModelProcess = ProcessModel(model_id, _RedisClient, number_of_thread = 20, decimate_target_strategy="ratio", lod_levels=[100, 90, 80, 60, 20, 10], small_object_threshold=0, scale_factor=1000)
+            _ModelProcess = ProcessModel(model_id, _RedisClient, number_of_thread = 20, decimate_target_strategy="ratio", lod_decimations=[-1, [0.5, 0.1, 1.0], [1.0, -1, 8.0], [3.0, -1, 15.0], 35, 50], small_object_threshold=[0, 0, 0, 0, 20, 40], scale_factor=1000)
             _ModelProcess.AddCustomInformation("hierarchy_id", None, True)
             _ModelProcess.Start()
         except Exception as e:
