@@ -105,7 +105,7 @@ class RedisClient:
         - Returns:\n
             - void\n
         """
-        data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': error_messages, 'done': True, 'messageCount' : self.message_count }
+        data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': str(error_messages), 'done': True, 'messageCount' : self.message_count }
         self.Publish(data)
 
     def __GetRedisInstance(self):

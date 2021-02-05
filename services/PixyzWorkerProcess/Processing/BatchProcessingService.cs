@@ -356,12 +356,9 @@ namespace PixyzWorkerProcess.Processing
         {
             if (!Message.Done)
             {
-                if (Message.Errors != null && Message.Errors.Length > 0)
+                if (Message.Errors != null && Message.Errors.Length > 2)
                 {
-                    for (int i = 0; i < Message.Errors.Length; ++i)
-                    {
-                        _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Message Error: {Message.Errors[i]}");
-                    }
+                    _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Message Errors: {Message.Errors}");
                 }
 
                 if (Message.HierarchyNode != null)

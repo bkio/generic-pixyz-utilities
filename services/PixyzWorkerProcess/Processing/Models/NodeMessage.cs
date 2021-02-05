@@ -1,8 +1,5 @@
 ﻿using ServiceUtilities.Process.RandomAccessFile;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PixyzWorkerProcess.Processing.Models
 {
@@ -12,7 +9,7 @@ namespace PixyzWorkerProcess.Processing.Models
         public ulong ModelId { get; set; }
         
         [JsonProperty("errors")]
-        public string[] Errors { get; set; }
+        public string Errors { get; set; }
 
         [JsonProperty("hierarchyNode")]
         public HierarchyNode HierarchyNode { get; set; }
