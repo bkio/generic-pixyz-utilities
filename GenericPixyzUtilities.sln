@@ -107,6 +107,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCloudServiceUtilities", "S
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BFileSDK-Dotnet", "submodules\bfilesdk-dotnet\common\BFileSDK-Dotnet\BFileSDK-Dotnet.shproj", "{F286B3E7-DAAB-468C-8399-93D3A8F26394}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlatBuffers", "services\Flatbuffers\FlatBuffers.csproj", "{3BDA4D59-E6AC-4540-9AD0-D36F8456ACD1}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		submodules\BDotNetFramework\Services\BServiceUtilities-FileService-GC\BServiceUtilities-FileService-GC.projitems*{06b29cdb-89d3-40a3-8abe-89030b32a047}*SharedItemsImports = 5
@@ -247,6 +249,10 @@ Global
 		{DEB2F0E9-67B0-4D84-8ED9-86CE4371B438}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DEB2F0E9-67B0-4D84-8ED9-86CE4371B438}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DEB2F0E9-67B0-4D84-8ED9-86CE4371B438}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BDA4D59-E6AC-4540-9AD0-D36F8456ACD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BDA4D59-E6AC-4540-9AD0-D36F8456ACD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BDA4D59-E6AC-4540-9AD0-D36F8456ACD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BDA4D59-E6AC-4540-9AD0-D36F8456ACD1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -302,6 +308,7 @@ Global
 		{8C278409-81AC-4F3E-B6C4-DCA8AC6A52AF} = {B687060E-8A36-45C5-B98C-D6F16DF344C3}
 		{DEB2F0E9-67B0-4D84-8ED9-86CE4371B438} = {B687060E-8A36-45C5-B98C-D6F16DF344C3}
 		{F286B3E7-DAAB-468C-8399-93D3A8F26394} = {2E923817-E540-4FA9-9D12-F7BC39AF5EF0}
+		{3BDA4D59-E6AC-4540-9AD0-D36F8456ACD1} = {FB05AEFD-222A-42D5-AE5E-5EE14F926CA2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A4DD829D-09C4-4CCA-B077-D69F9A10B7A0}

@@ -10,11 +10,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.IO.Compression;
 using System.Linq;
+using FlatBuffers;
+using FB;
 
 namespace PixyzWorkerProcess.Processing
 {
@@ -308,10 +309,14 @@ namespace PixyzWorkerProcess.Processing
                         decompressionStream.CopyTo(OutputStream);
                     }
 
-                    string DecompressedMessage = Encoding.UTF8.GetString(OutputStream.ToArray());
+                    //string DecompressedMessage = Encoding.UTF8.GetString(OutputStream.ToArray());
+                    byte[] DecompressedArray = OutputStream.ToArray();
+                    var buf = new ByteBuffer(DecompressedArray);
 
-                    NodeMessage MessageReceived = JsonConvert.DeserializeObject<NodeMessage>(DecompressedMessage);
-                    NodeMessage MessageReceivedCompressCopy = JsonConvert.DeserializeObject<NodeMessage>(DecompressedMessage);
+                    var FlatNodeMessage = FBNodeMessage.GetRootAsFBNodeMessage(buf);
+
+                    NodeMessage MessageReceived = ConvertNodeMessage(FlatNodeMessage);
+                    NodeMessage MessageReceivedCompressCopy = ConvertNodeMessage(FlatNodeMessage);
 
                     AddMessage(MessageReceived, MessageReceivedCompressCopy, _ErrorMessageAction);
                 }
@@ -321,6 +326,111 @@ namespace PixyzWorkerProcess.Processing
                 }
 
             });
+        }
+
+        public NodeMessage ConvertNodeMessage(FBNodeMessage FlatBufferMessage)
+        {
+            NodeMessage _Message = new NodeMessage();
+            _Message.Done = FlatBufferMessage.Done;
+            _Message.ModelID = FlatBufferMessage.ModelID;
+            _Message.MessageCount = FlatBufferMessage.MessageCount;
+            _Message.Errors = FlatBufferMessage.Errors;
+            if (FlatBufferMessage.HierarchyNode != null)
+            {
+                _Message.HierarchyNode = ConvertNodeH(FlatBufferMessage.HierarchyNode);
+            }
+            if (FlatBufferMessage.GeometryNode != null)
+            {
+                _Message.GeometryNode = ConvertNodeG(FlatBufferMessage.GeometryNode);
+            }
+            if (FlatBufferMessage.MetadataNode != null)
+            {
+                _Message.MetadataNode = ConvertNodeM(FlatBufferMessage.MetadataNode);
+            }
+            return _Message;
+        }
+
+        public HierarchyNode ConvertNodeH(FBHierarchyNode? FlatBufferMessage)
+        {
+            HierarchyNode _Node = new HierarchyNode();
+            _Node.UniqueID = FlatBufferMessage.Value.UniqueID;
+            _Node.ParentID = FlatBufferMessage.Value.ParentID;
+            _Node.MetadataID = FlatBufferMessage.Value.MetadataID;
+            _Node.GeometryParts = new List<HierarchyNode.GeometryPart>();
+            for (int i = 0; i < FlatBufferMessage.Value.GeometryPartsLength; i++)
+            {
+                var CurrentPart = FlatBufferMessage.Value.GeometryParts(i);
+                var Part = new HierarchyNode.GeometryPart();
+                Part.GeometryID = CurrentPart.Value.GeometryID;
+                Part.Location = new ServiceUtilities.Process.Geometry.Vector3D();
+                Part.Rotation = new ServiceUtilities.Process.Geometry.Vector3D();
+                Part.Scale = new ServiceUtilities.Process.Geometry.Vector3D();
+                Part.Color = new ServiceUtilities.Process.Geometry.Color();
+                if (CurrentPart.HasValue)
+                {
+                    Part.Location = new ServiceUtilities.Process.Geometry.Vector3D(CurrentPart.Value.Location.X, CurrentPart.Value.Location.Y, CurrentPart.Value.Location.Z);
+                    Part.Rotation = new ServiceUtilities.Process.Geometry.Vector3D(CurrentPart.Value.Rotation.X, CurrentPart.Value.Rotation.Y, CurrentPart.Value.Rotation.Z);
+                    Part.Scale = new ServiceUtilities.Process.Geometry.Vector3D(CurrentPart.Value.Scale.X, CurrentPart.Value.Scale.Y, CurrentPart.Value.Scale.Z);
+                    if (!CurrentPart.Value.Color.NoColor)
+                    {
+                        Part.Color = new ServiceUtilities.Process.Geometry.Color(CurrentPart.Value.Color.R, CurrentPart.Value.Color.G, CurrentPart.Value.Color.B);
+                    }
+                }
+                _Node.GeometryParts.Add(Part);
+            }
+            for (int i = 0; i < FlatBufferMessage.Value.ChildNodesLength; i++)
+            {
+                _Node.ChildNodes.Add(FlatBufferMessage.Value.ChildNodes(i));
+            }
+            return _Node;
+        }
+
+        public LodMessage ConvertNodeG(FBGeometryNode? FlatBufferMessage)
+        {
+            LodMessage _Node = new LodMessage();
+            _Node.UniqueID = FlatBufferMessage.Value.UniqueID;
+            _Node.LodNumber = FlatBufferMessage.Value.LodNumber;
+
+            if (FlatBufferMessage.Value.LOD != null)
+            {
+                var CurrentFlatLOD = FlatBufferMessage.Value.LOD;
+                ServiceUtilities.Process.Geometry.LOD CurrentLOD = new ServiceUtilities.Process.Geometry.LOD();
+                CurrentLOD.VertexNormalTangentList = new List<ServiceUtilities.Process.Geometry.VertexNormalTangent>();
+                
+                for (int i=0; i < CurrentFlatLOD.Value.VertexNormalTangentListLength; i++)
+                {
+                    var Item = CurrentFlatLOD.Value.VertexNormalTangentList(i);
+                    var VertNormTang = new ServiceUtilities.Process.Geometry.VertexNormalTangent();
+                    VertNormTang.Vertex = new ServiceUtilities.Process.Geometry.Vector3D();
+                    VertNormTang.Normal = new ServiceUtilities.Process.Geometry.Vector3D();
+                    VertNormTang.Tangent = new ServiceUtilities.Process.Geometry.Vector3D();
+                    if (Item.HasValue)
+                    {
+                        VertNormTang.Vertex = new ServiceUtilities.Process.Geometry.Vector3D(Item.Value.Vertex.X, Item.Value.Vertex.Y, Item.Value.Vertex.Z);
+                        VertNormTang.Normal = new ServiceUtilities.Process.Geometry.Vector3D(Item.Value.Normal.X, Item.Value.Normal.Y, Item.Value.Normal.Z);
+                        VertNormTang.Tangent = new ServiceUtilities.Process.Geometry.Vector3D(Item.Value.Tangent.X, Item.Value.Tangent.Y, Item.Value.Tangent.Z);
+                    }
+                    CurrentLOD.VertexNormalTangentList.Add(VertNormTang);
+                }
+                CurrentLOD.Indexes = new List<uint>();
+                for (int i = 0; i < CurrentFlatLOD.Value.IndexesLength; i++)
+                {
+                    CurrentLOD.Indexes.Add(CurrentFlatLOD.Value.Indexes(i));
+                }
+                _Node.LODs.Add(CurrentLOD);
+            }
+            return _Node;
+        }
+
+        public MetadataNode ConvertNodeM(FBMetadataNode? FlatBufferMessage)
+        {
+            MetadataNode _Node = new MetadataNode();
+            if(FlatBufferMessage.HasValue)
+            {
+                _Node.UniqueID = FlatBufferMessage.Value.UniqueID;
+                _Node.Metadata = FlatBufferMessage.Value.Metadata;
+            }
+            return _Node;
         }
 
         private ConcurrentDictionary<ulong, LodMessage> GeometryNodeToAssemblePlain = new ConcurrentDictionary<ulong, LodMessage>();
@@ -356,12 +466,9 @@ namespace PixyzWorkerProcess.Processing
         {
             if (!Message.Done)
             {
-                if (Message.Errors != null && Message.Errors.Length > 0)
+                if (Message.Errors != null && Message.Errors.Length > 2)
                 {
-                    for (int i = 0; i < Message.Errors.Length; ++i)
-                    {
-                        _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Message Error: {Message.Errors[i]}");
-                    }
+                    _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Message Errors: {Message.Errors}");
                 }
 
                 if (Message.HierarchyNode != null)

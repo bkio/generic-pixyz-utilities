@@ -1,4 +1,3 @@
-from batch.pixyz_algorithms import PixyzAlgorithms
 from .utils import Utils
 from .geometry_mesh import GeometryMesh
 from .logger import Logger
@@ -12,11 +11,11 @@ except: pass
 class GeometryNode:
     def __init__(self, thread_lock, occurrence, current_lod_level=0, small_object_threshold = 50, scale_factor = 1000):
         #Parameters
+        self.thread_lock = thread_lock
         self.occurrence = occurrence
+        self.current_lod_level = current_lod_level
         self.small_object_threshold = small_object_threshold
         self.scale_factor = scale_factor
-        self.current_lod_level = current_lod_level
-        self.thread_lock = thread_lock
         
         #Returns
         self.geometry_node = None
@@ -34,8 +33,8 @@ class GeometryNode:
             else:
                 self.geometry_node = {}
                 self.geometry_node['id'] = occurrence_id
-                self.geometry_node['lodNumber'] = self.current_lod_level
-                self.geometry_node['lods'] = [ lod ]
+                self.geometry_node['lodNumber'] = current_lod_level
+                self.geometry_node['lod'] = lod
 
             if error_message_lod != None:
                 self.error_messages.append(error_message_lod)

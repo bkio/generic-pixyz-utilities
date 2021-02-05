@@ -33,34 +33,15 @@ class Logger:
         core.addSessionLogFileVerbose(2)
         core.addConsoleVerbose(2)
     
-    def PrintMessageInfo(self, data, message_size, message_count):
-        total_vertexNormalTangentList = 0
-        total_indexes = 0
-
-        done = data['done']
-        errors = data['errors']
+    def PrintMessageInfo(self, done, errors, message_size, message_count):
         error_count = 0
         if errors != None:
             error_count = len(errors)
 
         if done:
-            logging.warning(f"=====> Done message has been sent. \tMessageCount: {message_count} \tMessageSize: {message_size} \tErrorCount: {error_count}")
+            logging.warning(f"=====> **** Done message has been sent. \tMessageCount: {message_count} \tMessageSize: {message_size} \tErrorCount: {error_count}")
         else:
-            try:
-                geometryNode = data['geometryNode']
-                if geometryNode != None:
-                    lod = geometryNode['lods'][0]
-                    lod_level = geometryNode['lodNumber']
-                    id = geometryNode['id']
-
-                    total_vertexNormalTangentList += len(lod['vertexNormalTangentList'])
-                    total_indexes += len(lod['indexes'])
-                    
-                    logging.warning(f"=====> Message has been sent. \tMessageCount: {message_count} \tMessageSize: {message_size} \tErrorCount: {error_count}. \tID:{id} \tLOD{lod_level} \tIndices: {total_indexes} \tVertices: {total_vertexNormalTangentList}")
-                else:
-                    logging.warning(f"=====> Message has been sent. \tMessageCount: {message_count} \tMessageSize: {message_size} \tErrorCount: {error_count}. \t*** No LOD information")    
-            except Exception as e:
-                logging.warning(f"=====> Message has been sent. \tMessageCount: {message_count} \tMessageSize: {message_size} \tErrorCount: {error_count}. \t*** No LOD information")
+            logging.warning(f"=====> Message has been sent. \tMessageCount: {message_count} \tMessageSize: {message_size} \tErrorCount: {error_count}.")
 
     def PrintOccurrenceInfo(self, occurrences):
         n_triangles = scene.getPolygonCount(occurrences, True, False, False)

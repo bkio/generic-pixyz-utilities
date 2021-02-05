@@ -19,7 +19,7 @@ class Color3:
                 # material_color['ao'] = materialDefinition.ao[1]
                 # material_color['opacity'] = materialDefinition.opacity[1]
         except:
-            self.material_color = { 'r':0, 'g':0, 'b':0 }
+            pass
 
     def Get(self):
         return self.material_color

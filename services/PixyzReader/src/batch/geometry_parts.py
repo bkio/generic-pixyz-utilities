@@ -18,7 +18,7 @@ class GeometryParts:
 
             # get transform informations
             matrix = scene.getGlobalMatrix(occurrence)
-            part_matrix = scene.getPartsTransforms([component])[0]
+            # part_matrix = scene.getPartsTransforms([component])[0]
             # _Matrix4x4 = Matrix4x4(matrix, part_matrix, scale_factor)
             vectorList = geom.toTRS(matrix)
             
@@ -37,9 +37,6 @@ class GeometryParts:
             geometry_part['color'] = Color3(component).Get()
             
             self.geometry_parts.append(geometry_part)
-
-        if len(self.geometry_parts) == 0:
-            self.geometry_parts = None
     
     def Get(self):
         return self.geometry_parts

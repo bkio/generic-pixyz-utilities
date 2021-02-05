@@ -33,6 +33,7 @@
     <ProjectReference Include="..\..\submodules\BDotNetFramework\Utilities\BCloudServiceUtilities\BCloudServiceUtilities.csproj" />
     <ProjectReference Include="..\..\submodules\BDotNetFramework\Utilities\BWebServiceUtilities-GC\BWebServiceUtilities-GC.csproj" />
     <ProjectReference Include="..\..\submodules\BDotNetFramework\Utilities\BWebServiceUtilities\BWebServiceUtilities.csproj" />
+    <ProjectReference Include="..\Flatbuffers\FlatBuffers.csproj" />
   </ItemGroup>
 
 </Project>

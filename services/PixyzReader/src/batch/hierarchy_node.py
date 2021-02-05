@@ -17,7 +17,7 @@ class HierarchyNode:
         if Utils().ForLoopSearch(part_occurrences, occurrence):
             self.geometryParts = GeometryParts(occurrence, scale_factor).Get()
         else:
-            self.geometryParts = None
+            self.geometryParts = []
 
         self.childNodes = []
         for child in scene.getChildren(occurrence):

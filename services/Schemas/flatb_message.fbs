@@ -1,0 +1,64 @@
+namespace FB;
+
+struct FBColor {
+  R :uint8;
+  G :uint8;
+  B :uint8;
+  NoColor :bool;
+}
+
+struct FBVector3D {
+  X :float;
+  Y :float;
+  Z :float;
+}
+
+struct FBVertexNormalTangent {
+  Vertex :FBVector3D;
+  Normal :FBVector3D;
+  Tangent :FBVector3D;
+}
+
+table FBLOD {
+  VertexNormalTangentList :[FBVertexNormalTangent];
+  Indexes :[uint32];
+}
+
+struct FBGeometryPart {
+  GeometryID :uint64;
+  Location :FBVector3D;
+  Rotation :FBVector3D;
+  Scale :FBVector3D;
+  Color :FBColor;
+}
+
+table FBHierarchyNode {
+  UniqueID :uint64;
+  ParentID :uint64;
+  MetadataID :uint64;
+  GeometryParts :[FBGeometryPart];
+  ChildNodes :[uint64];
+}
+
+table FBMetadataNode {
+  UniqueID :uint64;
+  Metadata :string;
+}
+
+table FBGeometryNode {
+  UniqueID :uint64;
+  LodNumber :int32;
+  LOD :FBLOD;
+}
+
+table FBNodeMessage {
+  ModelID :uint64;
+  Errors :string;
+  HierarchyNode :FBHierarchyNode;
+  MetadataNode :FBMetadataNode;
+  GeometryNode :FBGeometryNode;
+  Done :bool;
+  MessageCount :int32;
+}
+
+root_type FBNodeMessage;

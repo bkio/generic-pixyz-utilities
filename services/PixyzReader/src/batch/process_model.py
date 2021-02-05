@@ -1,5 +1,13 @@
 import random
 import math
+import flatbuffers
+from .FB.FBNodeMessage import *
+from .FB.FBVertexNormalTangent import *
+from .FB.FBGeometryNode import *
+from .FB.FBLOD import *
+from .FB.FBMetadataNode import *
+from .FB.FBHierarchyNode import *
+from .FB.FBGeometryPart import *
 from .logger import Logger
 from .redis_client import RedisClient
 from .utils import Utils
@@ -16,7 +24,7 @@ try:# Prevent IDE errors
 except: pass
 
 class ProcessModel:
-    def __init__(self, model_id, redis_client:RedisClient, number_of_thread = 20, decimate_target_strategy = "ratio", lod_levels = [100, 90, 80, 60, 20, 10], small_object_threshold = [0, 0, 0, 0, 20, 40], scale_factor = 1000):
+    def __init__(self, model_id, redis_client:RedisClient, number_of_thread = 20, decimate_target_strategy = "ratio", lod_decimations = [-1, 90, 88, 75, 35, 50], small_object_threshold = [0, 0, 0, 0, 20, 40], scale_factor = 1000):
         # Parameters
         self.model_id = model_id
         self.redis_client = redis_client
@@ -24,7 +32,7 @@ class ProcessModel:
             number_of_thread = 1
         self.number_of_thread = number_of_thread
         self.decimate_target_strategy = decimate_target_strategy
-        self.lod_levels = lod_levels
+        self.lod_decimations = lod_decimations
         self.small_object_threshold = small_object_threshold
         self.scale_factor = scale_factor
         self.custom_informations = []
@@ -43,45 +51,29 @@ class ProcessModel:
         self.part_occurrences = scene.getPartOccurrences(self.root)
         self.prototype_parts = self.GetPrototypeParts()
 
-        if len(self.lod_levels) <= 0:
-            self.lod_levels = [100]
-
-        # for testing lod calculation only
-        # for current_lod in range(len(self.lod_levels)):
-        #     if current_lod > 0:
-        #         self.AppyDecimateAlgorithms(current_lod)
+        if len(self.lod_decimations) <= 0:
+            self.lod_decimations = [-1]
         
-        for current_lod in range(len(self.lod_levels)):
+        for current_lod in range(len(self.lod_decimations)):
             if current_lod == 0:
                 self.CreateWorkerItems(self.root, '18446744069414584320')
             else:
-                self.AppyDecimateAlgorithms(current_lod)
+                self.ApplyDecimateAlgorithms(current_lod)
                 self.CreateWorkerItemsOnlyGeometry()
 
             self.StartProcess(current_lod)
         
         self.redis_client.Done()
 
-    def AppyDecimateAlgorithms(self, current_lod):
-        if current_lod == 1:
-            PixyzAlgorithms(verbose=True).DecimateMedium()
-
-        if current_lod == 2:
-            PixyzAlgorithms(verbose=True).DecimateStrong()
-
-        if current_lod == 3:
-            PixyzAlgorithms(verbose=True).Decimate([], 10.000000, -1, 30.000000)
-
-        if current_lod == 4:
-            # PixyzAlgorithms(verbose=True).SmartHidenRemoval()
-            PixyzAlgorithms(verbose=True).Decimate([], 80.000000, -1, 40.000000)
-            
-        if current_lod > 4:
-            decimate_value = current_lod
-            if self.decimate_target_strategy == "ratio":
-                decimate_value = math.ceil((self.lod_levels[current_lod]/self.lod_levels[current_lod-1]) * 100)
-            
-            PixyzAlgorithms(verbose=True).DecimateTarget([], [self.decimate_target_strategy, decimate_value])
+    def ApplyDecimateAlgorithms(self, current_lod_level):
+        lod_decimation_value = self.lod_decimations[current_lod_level]
+        if(type(lod_decimation_value) is list):
+            if(len(lod_decimation_value) == 3):
+                PixyzAlgorithms(verbose=True).Decimate([], lod_decimation_value[0], lod_decimation_value[1], lod_decimation_value[2])
+            else:
+                Logger().Error(f"Wrong LOD information for LOD{current_lod_level}, please to be sure it is a list and contains 3 elements for surfaic, lineic and normal parameter ")
+        else:
+            PixyzAlgorithms(verbose=True).DecimateTarget([], [self.decimate_target_strategy, lod_decimation_value])
 
     def GetPrototypeParts(self):
         prototypes = []
@@ -157,11 +149,17 @@ class ProcessModel:
 
         if current_lod_level == 0:
             metadata_id = str(random.getrandbits(64))
-            metadataNode = MetadataNode(occurrence, metadata_id).Get()
-            if metadataNode == None:
-                metadata_id = None
+            try:
+                metadataNode = MetadataNode(occurrence, metadata_id).Get()
+                if metadataNode == None:
+                    metadata_id = None
+            except Exception as e:
+                Logger().Error(f"=====> MetadataNode Error {e}")
 
-            hierarchyNode = HierarchyNode(self.part_occurrences, occurrence, parent_id, hierarchy_id, metadata_id, self.scale_factor).Get()
+            try:
+                hierarchyNode = HierarchyNode(self.part_occurrences, occurrence, parent_id, hierarchy_id, metadata_id, self.scale_factor).Get()
+            except Exception as e:
+                Logger().Error(f"=====> HierarchyNode Error {e}")
 
         geometryNode = None
         error_messages = []
@@ -169,10 +167,117 @@ class ProcessModel:
         if Utils().ForLoopSearch(self.prototype_parts, occurrence):
             thread_lock = self.redis_client.GetLock()
             current_small_object_threshold = self.small_object_threshold[current_lod_level]
-            geometryNode, error_messages = GeometryNode(thread_lock, occurrence, current_lod_level, current_small_object_threshold, self.scale_factor).Get()
+            try:
+                geometryNode, error_messages = GeometryNode(thread_lock, occurrence, current_lod_level, current_small_object_threshold, self.scale_factor).Get()
+            except Exception as e:
+                Logger().Error(f"=====> GeometryNode Error {e}")
 
         if metadataNode == None and hierarchyNode == None and geometryNode == None and len(error_messages) == 0:
             pass
         else:
-            data = {'model_id': self.model_id, 'hierarchyNode': hierarchyNode, 'metadataNode': metadataNode, 'geometryNode': geometryNode, 'errors': error_messages, 'done': False, 'messageCount' : 0 }
-            self.redis_client.Publish(data, verbose=False)
+            try:
+                fbbuilder = flatbuffers.Builder(2048)
+                metadataNodeFB = None
+                if metadataNode != None:
+                    metadata_string = fbbuilder.CreateString(metadataNode['metadata'])    
+                    FBMetadataNodeStart(fbbuilder)
+                    FBMetadataNodeAddUniqueID(fbbuilder, int(metadataNode['id']))
+                    FBMetadataNodeAddMetadata(fbbuilder, metadata_string)
+                    metadataNodeFB = FBMetadataNodeEnd(fbbuilder)
+
+                hierarchyNodeFB = None
+                if hierarchyNode != None:
+                    geometryPartVector = None
+                    geometryParts = hierarchyNode['geometryParts']
+                    geometryPartsLength = len(geometryParts)
+                    if geometryPartsLength > 0:
+                        FBHierarchyNodeStartGeometryPartsVector(fbbuilder, geometryPartsLength)
+                        for i in range(geometryPartsLength):
+                            part = geometryParts[i]
+                            geometryId = part['geometryId']
+                            location = part['location']
+                            rotation = part['rotation']
+                            scale = part['scale']
+                            color = part['color']
+                            if color == None:
+                                color = { 'r': 0, 'g': 0, 'b': 0, 'no_color': True }
+                            else:
+                                color['no_color'] = False
+                            CreateFBGeometryPart(fbbuilder, int(geometryId), float(location['x']), float(location['y']), float(location['z']), float(rotation['x']), float(rotation['y']), float(rotation['z']), float(scale['x']), float(scale['y']), float(scale['z']), int(color['r']), int(color['g']), int(color['b']), color['no_color'])
+                        geometryPartVector = fbbuilder.EndVector(geometryPartsLength)
+
+                    childNodeVector = None
+                    childNodes = hierarchyNode['childNodes']
+                    childNodesLength = len(childNodes)
+                    if childNodesLength > 0:
+                        FBHierarchyNodeStartChildNodesVector(fbbuilder, childNodesLength)
+                        for child in childNodes:
+                            fbbuilder.PrependUint64(int(child))
+                        
+                        childNodeVector = fbbuilder.EndVector(childNodesLength)
+                    FBHierarchyNodeStart(fbbuilder)
+                    FBHierarchyNodeAddUniqueID(fbbuilder, int(hierarchyNode['id']))
+                    FBHierarchyNodeAddParentID(fbbuilder, int(hierarchyNode['parentId']))
+                    FBHierarchyNodeAddMetadataID(fbbuilder, int(hierarchyNode['metadataId']))
+                    if geometryPartVector != None:
+                        FBHierarchyNodeAddGeometryParts(fbbuilder, geometryPartVector)
+                    if childNodeVector != None:
+                        FBHierarchyNodeAddChildNodes(fbbuilder, childNodeVector)
+                    hierarchyNodeFB = FBHierarchyNodeEnd(fbbuilder)
+                
+                geometryNodeFB = None
+                if geometryNode != None:
+                    lod = geometryNode['lod']
+
+                    vertexNormalTangentListVector = None
+                    vertexNormalTangentList = lod['vertexNormalTangentList']
+                    vertexNormalTangentListLength = len(vertexNormalTangentList)
+                    if vertexNormalTangentListLength > 0:
+                        FBLODStartVertexNormalTangentListVector(fbbuilder, vertexNormalTangentListLength)
+                        for item in vertexNormalTangentList:
+                            vertex = item['vertex']
+                            normal = item['normal']
+                            tangent = item['tangent']
+                            CreateFBVertexNormalTangent(fbbuilder, float(vertex['x']), float(vertex['y']), float(vertex['z']), float(normal['x']), float(normal['y']), float(normal['z']), float(tangent['x']), float(tangent['y']), float(tangent['z']))
+                        vertexNormalTangentListVector = fbbuilder.EndVector(vertexNormalTangentListLength)
+
+                    indexesVector = None
+                    indexes = lod['indexes']
+                    indexesLength = len(indexes)
+                    if indexesLength > 0:
+                        FBLODStartIndexesVector(fbbuilder, indexesLength)
+                        for index in indexes:
+                            fbbuilder.PrependUint32(index)
+                        indexesVector = fbbuilder.EndVector(indexesLength)
+
+                    FBLODStart(fbbuilder)
+                    if vertexNormalTangentListVector != None:
+                        FBLODAddVertexNormalTangentList(fbbuilder, vertexNormalTangentListVector)
+                    if indexesVector != None:
+                        FBLODAddIndexes(fbbuilder, indexesVector)
+                    lodFB = FBLODEnd(fbbuilder)
+
+                    FBGeometryNodeStart(fbbuilder)
+                    FBGeometryNodeAddUniqueID(fbbuilder, int(geometryNode['id']))
+                    FBGeometryNodeAddLodNumber(fbbuilder, int(geometryNode['lodNumber']))
+                    FBGeometryNodeAddLOD(fbbuilder, lodFB)
+                    geometryNodeFB = FBGeometryNodeEnd(fbbuilder)
+                
+                errors_string = fbbuilder.CreateString(str(error_messages))
+                FBNodeMessageStart(fbbuilder)
+                FBNodeMessageAddModelID(fbbuilder, int(self.model_id))
+                FBNodeMessageAddDone(fbbuilder, False)
+                FBNodeMessageAddMessageCount(fbbuilder, 0)
+                FBNodeMessageAddErrors(fbbuilder, errors_string)
+                if metadataNodeFB != None:
+                    FBNodeMessageAddMetadataNode(fbbuilder, metadataNodeFB)
+                if hierarchyNodeFB != None:
+                    FBNodeMessageAddHierarchyNode(fbbuilder, hierarchyNodeFB)
+                if geometryNodeFB != None:
+                    FBNodeMessageAddGeometryNode(fbbuilder, geometryNodeFB)
+                data = FBNodeMessageEnd(fbbuilder)
+                fbbuilder.Finish(data)
+                data_buffer = fbbuilder.Output()
+                self.redis_client.Publish(data_buffer, done=False, errors=error_messages, verbose=False)
+            except Exception as e:
+                Logger().Error(f"=====> Redis Publish Error {e}")

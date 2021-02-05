@@ -4,6 +4,8 @@ import zlib
 import time
 import json
 import sys
+import flatbuffers
+from .FB.FBNodeMessage import *
 from threading import Lock
 from .logger import Logger
 
@@ -40,10 +42,11 @@ class RedisClient:
         return self.message_count
 
     def DeflateEncodeBase64(self, message):
-        compressed_message = zlib.compress(bytes(message, 'utf-8'))[2:-4]
+        # compressed_message = zlib.compress(bytes(message, 'utf-8'))[2:-4]
+        compressed_message = zlib.compress(message)[2:-4]
         return base64.b64encode(compressed_message)
 
-    def Publish(self, data, verbose = True):
+    def Publish(self, data_buffer, done = False, errors = [], verbose = True):
         """ 
         Publish json data to specified channel
 
@@ -56,12 +59,11 @@ class RedisClient:
         """
         self.message_count = self.message_count + 1
         
-        message = json.dumps(data)
-        base64_message = self.DeflateEncodeBase64(message)
+        base64_message = self.DeflateEncodeBase64(data_buffer)
 
         message_size = sys.getsizeof(base64_message)
         if verbose:
-            self.logger.PrintMessageInfo(data, message_size, self.message_count)
+            self.logger.PrintMessageInfo(done, errors, message_size, self.message_count)
 
         retryCount = 0
         while retryCount < 10 :
@@ -92,8 +94,15 @@ class RedisClient:
         - Returns:\n
             - void\n
         """
-        data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': None, 'done': True, 'messageCount' : self.message_count }
-        self.Publish(data)
+        fbbuilder = flatbuffers.Builder(2048)
+        FBNodeMessageStart(fbbuilder)
+        FBNodeMessageAddModelID(fbbuilder, int(self.model_id))
+        FBNodeMessageAddDone(fbbuilder, True)
+        FBNodeMessageAddMessageCount(fbbuilder, self.message_count)
+        data = FBNodeMessageEnd(fbbuilder)
+        fbbuilder.Finish(data)
+        data_buffer = fbbuilder.Output()
+        self.Publish(data_buffer, done=True, errors=[], verbose=True)
 
     def Error(self, error_messages = []):
         """ 
@@ -105,8 +114,17 @@ class RedisClient:
         - Returns:\n
             - void\n
         """
-        data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': error_messages, 'done': True, 'messageCount' : self.message_count }
-        self.Publish(data)
+        fbbuilder = flatbuffers.Builder(2048)
+        errors_string = fbbuilder.CreateString(str(error_messages))
+        FBNodeMessageStart(fbbuilder)
+        FBNodeMessageAddModelID(fbbuilder, int(self.model_id))
+        FBNodeMessageAddDone(fbbuilder, True)
+        FBNodeMessageAddMessageCount(fbbuilder, self.message_count)
+        FBNodeMessageAddErrors(fbbuilder, errors_string)
+        data = FBNodeMessageEnd(fbbuilder)
+        fbbuilder.Finish(data)
+        data_buffer = fbbuilder.Output()
+        self.Publish(data_buffer, done=True, errors=error_messages, verbose=True)
 
     def __GetRedisInstance(self):
         """ 
