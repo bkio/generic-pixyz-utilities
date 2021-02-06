@@ -34,7 +34,6 @@ class ProcessModel:
 
         self.part_occurrences = []
         self.prototype_parts = []
-        self.decimate_values = []
 
     def Start(self):
         Logger().Warning("=====> Model processing has been started, please wait processing...")
