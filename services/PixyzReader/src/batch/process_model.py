@@ -42,7 +42,6 @@ class ProcessModel:
 
         self.part_occurrences = []
         self.prototype_parts = []
-        self.decimate_values = []
 
     def Start(self):
         Logger().Warning("=====> Model processing has been started, please wait processing...")
@@ -107,7 +106,7 @@ class ProcessModel:
             self.ApplyCustomInformations(child)
 
     def StartProcess(self, current_lod_level):
-        Logger().Warning(f"=====> LOD{current_lod_level} processing is started.")
+        Logger().Warning(f"=====> LOD{current_lod_level} processing is started. Total Worker Count: {len(self.workerItems)}")
 
         # 1) Init a Thread pool with the desired number of threads
         pool = ThreadPool(self.number_of_thread)

@@ -54,7 +54,7 @@ namespace PixyzWorkerProcess.Processing
         List<Stream> WriteStreams = new List<Stream>();
 
         private ConcurrentQueue<Node> NodesToWriteAndCompress = new ConcurrentQueue<Node>();
-        private ConcurrentQueue<Node> NodesToWrite = new ConcurrentQueue<Node>();
+        //private ConcurrentQueue<Node> NodesToWrite = new ConcurrentQueue<Node>();
 
         private bool QueueComplete = false;
 
@@ -101,27 +101,27 @@ namespace PixyzWorkerProcess.Processing
             IsFileWrite = _IsFileWrite;
         }
 
-        public void AddItemToQueues(Node Item, Node ItemCompress)
+        public void AddItemToQueues(Node Item/*, Node ItemCompress*/)
         {
-            NodesToWriteAndCompress.Enqueue(ItemCompress);
-            NodesToWrite.Enqueue(Item);
+            NodesToWriteAndCompress.Enqueue(Item);
+            //NodesToWrite.Enqueue(Item);
         }
 
         public void StartProcessingBatchData(Action<string> _ErrorMessageAction = null)
         {
             State = RUNNING_STATE;
             ManualResetEvent WaitCompressedFiles = new ManualResetEvent(false);
-            ManualResetEvent WaitUnCompressedFiles = new ManualResetEvent(false);
+            //ManualResetEvent WaitUnCompressedFiles = new ManualResetEvent(false);
 
             ProcessQueue(_ErrorMessageAction, WaitCompressedFiles, NodesToWriteAndCompress, EDeflateCompression.Compress);
-            ProcessQueue(_ErrorMessageAction, WaitUnCompressedFiles, NodesToWrite, EDeflateCompression.DoNotCompress);
+            //ProcessQueue(_ErrorMessageAction, WaitUnCompressedFiles, NodesToWrite, EDeflateCompression.DoNotCompress);
 
             BTaskWrapper.Run(() =>
             {
                 try
                 {
                     WaitCompressedFiles.WaitOne();
-                    WaitUnCompressedFiles.WaitOne();
+                    //WaitUnCompressedFiles.WaitOne();
 
                     if (State != FAILED_STATE)
                     {
@@ -315,9 +315,9 @@ namespace PixyzWorkerProcess.Processing
                     var FlatNodeMessage = FBNodeMessage.GetRootAsFBNodeMessage(buf);
 
                     NodeMessage MessageReceived = ConvertNodeMessage(FlatNodeMessage);
-                    NodeMessage MessageReceivedCompressCopy = ConvertNodeMessage(FlatNodeMessage);
+                    //NodeMessage MessageReceivedCompressCopy = ConvertNodeMessage(FlatNodeMessage);
 
-                    AddMessage(MessageReceived, MessageReceivedCompressCopy, _ErrorMessageAction);
+                    AddMessage(MessageReceived, _ErrorMessageAction);
                 }
                 catch (Exception ex)
                 {
@@ -433,7 +433,7 @@ namespace PixyzWorkerProcess.Processing
         }
 
         private ConcurrentDictionary<ulong, LodMessage> GeometryNodeToAssemblePlain = new ConcurrentDictionary<ulong, LodMessage>();
-        private ConcurrentDictionary<ulong, LodMessage> GeometryNodeToAssembleCompressed = new ConcurrentDictionary<ulong, LodMessage>();
+        //private ConcurrentDictionary<ulong, LodMessage> GeometryNodeToAssembleCompressed = new ConcurrentDictionary<ulong, LodMessage>();
 
         private static void MergeGeometry(ConcurrentDictionary<ulong, LodMessage> _GeometryStore, LodMessage NewMessage)
         {
@@ -458,10 +458,9 @@ namespace PixyzWorkerProcess.Processing
             {
                 Node.Value.LODs = Node.Value.LODs.OrderByDescending(x => x.Indexes.Count).ToList();
             });
-
         }
 
-        public void AddMessage(NodeMessage Message, NodeMessage MessageCompressCopy, Action<string> _ErrorMessageAction = null)
+        public void AddMessage(NodeMessage Message, Action<string> _ErrorMessageAction = null)
         {
             if (!Message.Done)
             {
@@ -476,7 +475,7 @@ namespace PixyzWorkerProcess.Processing
                     {
                         Message.HierarchyNode.ParentID = Node.UNDEFINED_ID;
                     }
-                    AddItemToQueues(Message.HierarchyNode, MessageCompressCopy.HierarchyNode);
+                    AddItemToQueues(Message.HierarchyNode/*, MessageCompressCopy.HierarchyNode*/);
                 }
 
                 if (Message.GeometryNode != null)
@@ -485,12 +484,12 @@ namespace PixyzWorkerProcess.Processing
                     //AddItemToQueues(Message.GeometryNode, MessageCompressCopy.GeometryNode);
 
                     MergeGeometry(GeometryNodeToAssemblePlain, Message.GeometryNode);
-                    MergeGeometry(GeometryNodeToAssembleCompressed, MessageCompressCopy.GeometryNode);
+                    //MergeGeometry(GeometryNodeToAssembleCompressed, MessageCompressCopy.GeometryNode);
                 }
 
                 if (Message.MetadataNode != null)
                 {
-                    AddItemToQueues(Message.MetadataNode, MessageCompressCopy.MetadataNode);
+                    AddItemToQueues(Message.MetadataNode/*, MessageCompressCopy.MetadataNode*/);
                 }
 
                 Interlocked.Increment(ref QueuedMessageCount);
@@ -511,13 +510,13 @@ namespace PixyzWorkerProcess.Processing
                     {
                         _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Received End signal for {ExpectedMessageCount} messages");
                         CompleteMerge(GeometryNodeToAssemblePlain);
-                        CompleteMerge(GeometryNodeToAssembleCompressed);
+                        //CompleteMerge(GeometryNodeToAssembleCompressed);
 
                         foreach (var Node in GeometryNodeToAssemblePlain)
                         {
                             //There should exist a copy of each message
-                            LodMessage Copy = GeometryNodeToAssembleCompressed[Node.Key];
-                            AddItemToQueues(Node.Value, Copy);
+                            /*LodMessage Copy = GeometryNodeToAssembleCompressed[Node.Key];*/
+                            AddItemToQueues(Node.Value/*, Copy*/);
                         }
 
                         SignalQueuingComplete();

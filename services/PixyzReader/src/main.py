@@ -41,13 +41,13 @@ def StartModelProcess(_logger):
         # Import Unzipped Files
         #system_error_message = ImportFiles(models_folder_path="/app/models", zip_main_assembly_file_name_if_any=ZIP_MAIN_ASSEMBLY_FILE_NAME_IF_ANY).Run()
 
-        files_with_path = []
+        # files_with_path = []
         # files_with_path.append("C:/tmp/models/fbx/UI-18-8101.fbx")
-        files_with_path.append("C:/tmp/models/fbx/OLOverall.fbx")
+        # files_with_path.append("C:/tmp/models/fbx/OLOverall.fbx")
         # files_with_path.append("C:/tmp/models/fbx/AREAQB.fbx")
 
-        system_error_message = ImportFileList(files_with_path).Run()
-        # system_error_message = ImportScene("C:/tmp/models/pxz/AV_EXP.pxz").Run()
+        # system_error_message = ImportFileList(files_with_path).Run()
+        system_error_message = ImportScene("C:/tmp/models/pxz/AV_EXP.pxz").Run()
 
         Logger("before operation").PrintModelInfo()
         # PixyzAlgorithms(verbose=True).RepairCAD()
@@ -56,8 +56,8 @@ def StartModelProcess(_logger):
         # PixyzAlgorithms(verbose=True).DeletePatches()
         # PixyzAlgorithms(verbose=True).DeleteLines()
         PixyzAlgorithms(verbose=True).DeleteFreeVertices()
-        # PixyzAlgorithms(verbose=True).MergePartsByAssemblies()
-        # PixyzAlgorithms(verbose=True).MergeFinalLevel()
+        PixyzAlgorithms(verbose=True).MergePartsByAssemblies()
+        PixyzAlgorithms(verbose=True).MergeFinalLevel()
         PixyzAlgorithms(verbose=True).MakeInstanceUnique()
         # PixyzAlgorithms(verbose=True).CreateInstancesBySimilarity()
         PixyzAlgorithms(verbose=True).Triangularize()
