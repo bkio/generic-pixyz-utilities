@@ -1,5 +1,5 @@
 import random
-import math
+import time
 from .logger import Logger
 from .redis_client import RedisClient
 from .utils import Utils
@@ -43,27 +43,37 @@ class ProcessModel:
             self.lod_decimations = [-1]
         
         for current_lod_level in range(len(self.lod_decimations)):
-            self.part_occurrences = scene.getPartOccurrences(self.root)
-            self.prototype_parts = self.GetPrototypeParts()
-
             if current_lod_level == 0:
+                self.UpdatePartInformation()
                 self.CreateWorkerItems(self.root, '18446744069414584320')
             else:
                 self.ApplyDecimateAlgorithms(current_lod_level)
+                self.UpdatePartInformation()
                 self.CreateWorkerItemsOnlyGeometry()
 
             self.StartProcess(current_lod_level)
         
+        Logger().Warning("=====> Process is done. Please wait for done message.")
         self.redis_client.Done()
+
+    def UpdatePartInformation(self):
+        self.part_occurrences = scene.getPartOccurrences(self.root)
+        self.prototype_parts = self.GetPrototypeParts()
 
     def ApplyDecimateAlgorithms(self, current_lod_level):
         lod_decimation_value = self.lod_decimations[current_lod_level]
-        if(type(lod_decimation_value) is list):
-            if(len(lod_decimation_value) == 3):
+        if type(lod_decimation_value) is list:
+            if len(lod_decimation_value) == 3:
                 Logger().Warning(f"=====> Applying DecimateToQuality algorithm to LOD{current_lod_level}...")
                 PixyzAlgorithms(verbose=True).Decimate([], lod_decimation_value[0], lod_decimation_value[1], lod_decimation_value[2])
+            elif len(lod_decimation_value) == 4:
+                Logger().Warning(f"=====> Applying HiddenRemoval algorithm to LOD{current_lod_level}...")
+                PixyzAlgorithms(verbose=False).IdentifyPatches([], True, True, lod_decimation_value[0])
+                PixyzAlgorithms(verbose=False).HiddenRemoval([], 1, lod_decimation_value[1], lod_decimation_value[2], lod_decimation_value[3])
+                PixyzAlgorithms(verbose=False).DeletePatches()
+                PixyzAlgorithms(verbose=True).DeleteFreeVertices()
             else:
-                Logger().Error(f"Wrong LOD information for LOD{current_lod_level}, please to be sure it is a list and contains 3 elements for surfaic, lineic and normal parameter ")
+                Logger().Error(f"Wrong LOD information for LOD{current_lod_level}, please to be sure it is a list and contains 3 or 4 elements for decimateToQuality or HiddenRemoval algorithms.")
         else:
             Logger().Warning(f"=====> Applying DecimateTarget algorithm with {self.decimate_target_strategy}:{lod_decimation_value} parameters to LOD{current_lod_level}...")
             PixyzAlgorithms(verbose=True).DecimateTarget([], [self.decimate_target_strategy, lod_decimation_value])
@@ -98,7 +108,7 @@ class ProcessModel:
             self.ApplyCustomInformations(child)
 
     def StartProcess(self, current_lod_level):
-        Logger().Warning(f"=====> LOD{current_lod_level} processing is started.")
+        Logger().Warning(f"=====> LOD{current_lod_level} processing is started. LOD{current_lod_level} Worker Count: {len(self.workerItems)}")
 
         # 1) Init a Thread pool with the desired number of threads
         pool = ThreadPool(self.number_of_thread)
@@ -158,18 +168,21 @@ class ProcessModel:
         error_messages = []
 
         if Utils().ForLoopSearch(self.prototype_parts, occurrence):
-            thread_lock = self.redis_client.GetLock()
             current_small_object_threshold = self.small_object_threshold[current_lod_level]
             try:
-                geometryNode, error_messages = GeometryNode(thread_lock, occurrence, current_lod_level, current_small_object_threshold, self.scale_factor).Get()
+                geometryNode, error_messages = GeometryNode(occurrence, current_lod_level, current_small_object_threshold, self.scale_factor).Get()
             except Exception as e:
                 Logger().Error(f"=====> GeometryNode Error {e}")
 
-        if metadataNode == None and hierarchyNode == None and geometryNode == None and len(error_messages) == 0:
+        error_message_str = None
+        if len(error_messages) > 0:
+            error_message_str = str(error_messages)
+
+        if metadataNode == None and hierarchyNode == None and geometryNode == None and error_message_str == None:
             pass
         else:
             try:
-                data = {'model_id': self.model_id, 'hierarchyNode': hierarchyNode, 'metadataNode': metadataNode, 'geometryNode': geometryNode, 'errors': str(error_messages), 'done': False, 'messageCount' : 0 }
+                data = {'model_id': self.model_id, 'hierarchyNode': hierarchyNode, 'metadataNode': metadataNode, 'geometryNode': geometryNode, 'errors': error_message_str, 'done': False, 'messageCount' : 0 }
                 self.redis_client.Publish(data, verbose=False)
             except Exception as e:
                 Logger().Error(f"=====> Redis Publish Error {e}")

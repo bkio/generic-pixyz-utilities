@@ -54,8 +54,9 @@ class RedisClient:
         - Returns:\n
             - void\n
         """
-        self.message_count = self.message_count + 1
-        
+        with self.thread_lock:
+            self.message_count = self.message_count + 1
+
         message = json.dumps(data)
         base64_message = self.DeflateEncodeBase64(message)
 
@@ -64,7 +65,7 @@ class RedisClient:
             self.logger.PrintMessageInfo(data, message_size, self.message_count)
 
         retryCount = 0
-        while retryCount < 10 :
+        while retryCount < 10:
             try:
                 self.redis_instance.publish(self.channel, base64_message)
                 retryCount = 10
@@ -92,6 +93,7 @@ class RedisClient:
         - Returns:\n
             - void\n
         """
+        time.sleep(60)
         data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': None, 'done': True, 'messageCount' : self.message_count }
         self.Publish(data)
 
@@ -105,7 +107,12 @@ class RedisClient:
         - Returns:\n
             - void\n
         """
-        data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': str(error_messages), 'done': True, 'messageCount' : self.message_count }
+        error_message_str = None
+        if len(error_messages) > 0:
+            error_message_str = str(error_messages)
+
+        time.sleep(60)
+        data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': error_message_str, 'done': True, 'messageCount' : self.message_count }
         self.Publish(data)
 
     def __GetRedisInstance(self):

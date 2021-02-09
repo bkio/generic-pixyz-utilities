@@ -9,9 +9,8 @@ try:# Prevent IDE errors
 except: pass
 
 class GeometryNode:
-    def __init__(self, thread_lock, occurrence, current_lod_level=0, small_object_threshold = 50, scale_factor = 1000):
+    def __init__(self, occurrence, current_lod_level=0, small_object_threshold = 50, scale_factor = 1000):
         #Parameters
-        self.thread_lock = thread_lock
         self.occurrence = occurrence
         self.current_lod_level = current_lod_level
         self.small_object_threshold = small_object_threshold
