@@ -63,7 +63,6 @@ namespace PixyzWorkerProcess.Processing
 
         private ConcurrentQueue<Node> NodesToWrite = new ConcurrentQueue<Node>();
 
-
         private List<HierarchyNode> HierarchyNodeCache = new List<HierarchyNode>();
         private List<MetadataNode> MetadataNodeCache = new List<MetadataNode>();
 
@@ -311,6 +310,10 @@ namespace PixyzWorkerProcess.Processing
         {
             if (!HierarchyWritten)
             {
+                for (int i = 0; i < MetadataNodeCache.Count; ++i)
+                {
+                    NodesToWrite.Enqueue(CopyMetadata(MetadataNodeCache[i]));
+                }
                 for (int i = 0; i < HierarchyNodeCache.Count; ++i)
                 {
                     HierarchyNode Node = CopyHierarchy(HierarchyNodeCache[i]);
@@ -319,10 +322,7 @@ namespace PixyzWorkerProcess.Processing
 
                     NodesToWrite.Enqueue(Node);
                 }
-                for (int i = 0; i < MetadataNodeCache.Count; ++i)
-                {
-                    NodesToWrite.Enqueue(CopyMetadata(MetadataNodeCache[i]));
-                }
+
             }
         }
 
@@ -463,7 +463,10 @@ namespace PixyzWorkerProcess.Processing
                     }
 
                     CheckHierarchyNode(Message.HierarchyNode);
-                    HierarchyNodeCache.Add(Message.HierarchyNode);
+                    lock (HierarchyNodeCache)
+                    {
+                        HierarchyNodeCache.Add(Message.HierarchyNode);
+                    }
 
                     AddItemToQueues(CopyHierarchy(Message.HierarchyNode));
                 }
@@ -478,7 +481,10 @@ namespace PixyzWorkerProcess.Processing
 
                 if (Message.MetadataNode != null)
                 {
-                    MetadataNodeCache.Add(Message.MetadataNode);
+                    lock (MetadataNodeCache)
+                    {
+                        MetadataNodeCache.Add(Message.MetadataNode);
+                    }
 
                     AddItemToQueues(CopyMetadata(Message.MetadataNode));
                 }
@@ -499,13 +505,13 @@ namespace PixyzWorkerProcess.Processing
                     if (!QueueComplete)
                     {
                         _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Received End signal for {ExpectedMessageCount} messages");
-                        CheckCacheQueueDump();
                         CompleteMerge(GeometryNodeToAssemble);
 
                         foreach (var Node in GeometryNodeToAssemble)
                         {
                             AddItemToQueues(Node.Value);
                         }
+                        CheckCacheQueueDump();
 
                         SignalQueuingComplete();
                     }
