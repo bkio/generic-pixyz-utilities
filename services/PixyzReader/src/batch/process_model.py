@@ -1,7 +1,7 @@
 import random
-import time
 from .logger import Logger
 from .redis_client import RedisClient
+from .check_status_code import CheckStatusCode
 from .utils import Utils
 from .thread_pool import ThreadPool
 from .metadata_node import MetadataNode
@@ -51,10 +51,18 @@ class ProcessModel:
                 self.UpdatePartInformation()
                 self.CreateWorkerItemsOnlyGeometry()
 
+            if current_lod_level > 0:
+                syncing = False
+                while (syncing != True):
+                    syncing = CheckStatusCode(check_url="http://127.0.0.1:8081/healthcheck").Run()
+
             self.StartProcess(current_lod_level)
-        
-        Logger().Warning("=====> Process is done. Please wait for done message.")
-        self.redis_client.Done()
+
+            self.redis_client.Done()
+
+            ending_process = False
+            while (ending_process != True):
+                ending_process = CheckStatusCode(check_url="http://127.0.0.1:8081/endprocess").Run()
 
     def UpdatePartInformation(self):
         self.part_occurrences = scene.getPartOccurrences(self.root)

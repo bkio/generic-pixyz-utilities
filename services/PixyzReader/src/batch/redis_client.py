@@ -93,7 +93,6 @@ class RedisClient:
         - Returns:\n
             - void\n
         """
-        time.sleep(60)
         data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': None, 'done': True, 'messageCount' : self.message_count }
         self.Publish(data)
 
@@ -111,7 +110,6 @@ class RedisClient:
         if len(error_messages) > 0:
             error_message_str = str(error_messages)
 
-        time.sleep(60)
         data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': error_message_str, 'done': True, 'messageCount' : self.message_count }
         self.Publish(data)
 
