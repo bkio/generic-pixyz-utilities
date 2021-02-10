@@ -6,20 +6,20 @@ except: pass
 
 class Color3:
     """Getting Color3(r,g,b) information from Pixyz with materialDefinition"""
-    def __init__(self, component):
+    def __init__(self, occurrence):
 
         self.material_color = None
         try:
-            for partMaterial in scene.listPartSubMaterials(component):
-                materialDefinition = material.getMaterialDefinition(partMaterial)
-                self.material_color = self.__GetColorJson(materialDefinition.diffuse[0])
-                # material_color['normal'] = materialDefinition.normal[1]
-                # material_color['metallic'] = materialDefinition.metallic[1]
-                # material_color['roughness'] = materialDefinition.roughness[1]
-                # material_color['ao'] = materialDefinition.ao[1]
-                # material_color['opacity'] = materialDefinition.opacity[1]
+            partMaterial = scene.getActiveMaterial(occurrence)
+            materialDefinition = material.getMaterialDefinition(partMaterial)
+            self.material_color = self.__GetColorJson(materialDefinition.albedo[1])
+            # material_color['normal'] = materialDefinition.normal[1]
+            # material_color['metallic'] = materialDefinition.metallic[1]
+            # material_color['roughness'] = materialDefinition.roughness[1]
+            # material_color['ao'] = materialDefinition.ao[1]
+            # material_color['opacity'] = materialDefinition.opacity[1]
         except:
-            self.material_color = { 'r':0, 'g':0, 'b':0 }
+            pass
 
     def Get(self):
         return self.material_color
