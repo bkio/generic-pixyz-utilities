@@ -83,6 +83,9 @@ namespace PixyzWorkerProcess.Processing
 
         private string NotifyDoneUrl = "";
 
+        private int ExpectedMessageCount = -1;
+        private int QueuedMessageCount = 0;
+
         private static void LogError(string _Message)
         {
             Console.WriteLine(_Message);
@@ -186,10 +189,11 @@ namespace PixyzWorkerProcess.Processing
                 {
                     ManualResetEvent Wait = StartProcessingBatchData(_ErrorMessageAction);
                     Wait.WaitOne();
-
+                    QueueComplete = false;
+                    ExpectedMessageCount = -1;
+                    QueuedMessageCount++;
                     GeometryNodeToAssemble.Clear();
                     NodesToWrite.Clear();
-                    QueueComplete = false;
                     WriteComplete = true;
                     HierarchyWritten = false;
                     WriteCompleteWait.WaitOne();
@@ -300,23 +304,31 @@ namespace PixyzWorkerProcess.Processing
         /// </summary>
         public void SignalQueuingComplete()
         {
-            if(!HierarchyWritten)
+            QueueComplete = true;
+        }
+
+        private void CheckCacheQueueDump()
+        {
+            if (!HierarchyWritten)
             {
-                for(int i = 0; i < HierarchyNodeCache.Count; ++i)
+                for (int i = 0; i < HierarchyNodeCache.Count; ++i)
                 {
-                    NodesToWrite.Enqueue(CopyHierarchy(HierarchyNodeCache[i]));
+                    HierarchyNode Node = CopyHierarchy(HierarchyNodeCache[i]);
+
+                    Node.GeometryParts = Node.GeometryParts.Where(x => GeometryNodeToAssemble.Keys.Contains(x.GeometryID)).ToList();
+
+                    NodesToWrite.Enqueue(Node);
                 }
-                for(int i = 0; i < MetadataNodeCache.Count; ++i)
+                for (int i = 0; i < MetadataNodeCache.Count; ++i)
                 {
                     NodesToWrite.Enqueue(CopyMetadata(MetadataNodeCache[i]));
                 }
             }
-
-            QueueComplete = true;
         }
 
         private HierarchyNode CopyHierarchy(HierarchyNode NodeToCopy)
         {
+            
             byte[] CopyBytes = new byte[NodeToCopy.GetSize()];
             NodeToCopy.ToBytes(CopyBytes, 0);
             HierarchyNode CopyNode = new HierarchyNode();
@@ -380,8 +392,7 @@ namespace PixyzWorkerProcess.Processing
             }
         }
 
-        private int ExpectedMessageCount = -1;
-        private int QueuedMessageCount = 0;
+
         private bool SubscribeToPubSub(IBPubSubServiceInterface _PubSub, Action<string> _ErrorMessageAction = null)
         {
             return _PubSub.CustomSubscribe("models", (Message, Json) =>
@@ -451,6 +462,7 @@ namespace PixyzWorkerProcess.Processing
                         Message.HierarchyNode.ParentID = Node.UNDEFINED_ID;
                     }
 
+                    CheckHierarchyNode(Message.HierarchyNode);
                     HierarchyNodeCache.Add(Message.HierarchyNode);
 
                     AddItemToQueues(CopyHierarchy(Message.HierarchyNode));
@@ -487,6 +499,7 @@ namespace PixyzWorkerProcess.Processing
                     if (!QueueComplete)
                     {
                         _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Received End signal for {ExpectedMessageCount} messages");
+                        CheckCacheQueueDump();
                         CompleteMerge(GeometryNodeToAssemble);
 
                         foreach (var Node in GeometryNodeToAssemble)
