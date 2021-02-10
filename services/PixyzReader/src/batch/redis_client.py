@@ -2,7 +2,7 @@ import redis
 import base64
 import zlib
 import time
-import json
+import orjson
 import sys
 from threading import Lock
 from .logger import Logger
@@ -40,7 +40,7 @@ class RedisClient:
         return self.message_count
 
     def DeflateEncodeBase64(self, message):
-        compressed_message = zlib.compress(bytes(message, 'utf-8'))[2:-4]
+        compressed_message = zlib.compress(message)[2:-4]
         return base64.b64encode(compressed_message)
 
     def Publish(self, data, verbose = True):
@@ -57,7 +57,7 @@ class RedisClient:
         with self.thread_lock:
             self.message_count = self.message_count + 1
 
-        message = json.dumps(data)
+        message = orjson.dumps(data)
         base64_message = self.DeflateEncodeBase64(message)
 
         message_size = sys.getsizeof(base64_message)
@@ -93,7 +93,6 @@ class RedisClient:
         - Returns:\n
             - void\n
         """
-        time.sleep(60)
         data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': None, 'done': True, 'messageCount' : self.message_count }
         self.Publish(data)
 
@@ -111,7 +110,6 @@ class RedisClient:
         if len(error_messages) > 0:
             error_message_str = str(error_messages)
 
-        time.sleep(60)
         data = {'model_id': self.model_id, 'hierarchyNode': None, 'metadataNode': None, 'geometryNode': None, 'errors': error_message_str, 'done': True, 'messageCount' : self.message_count }
         self.Publish(data)
 

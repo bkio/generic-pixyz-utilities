@@ -6,7 +6,7 @@ from batch.download_files import DownloadFiles
 from batch.import_files import ImportFiles
 from batch.import_file_list import ImportFileList
 from batch.import_scene import ImportScene
-from batch.health_check import HealthCheck
+from batch.check_status_code import CheckStatusCode
 from batch.logger import Logger
 from batch.redis_client import RedisClient
 from batch.pixyz_algorithms import PixyzAlgorithms
@@ -14,11 +14,11 @@ from batch.process_model import ProcessModel
 
 def StartModelProcess(_logger):
     # Sync with worker process
-    syncing = False
     _logger.Warning("=====> Syncing...")
+    syncing = False
     while (syncing != True):
-        syncing = HealthCheck(check_url="http://127.0.0.1:8081/healthcheck").Run()
-        # syncing = HealthCheck(check_url="http://192.168.137.139:8081/healthcheck").Run()
+        syncing = CheckStatusCode(check_url="http://127.0.0.1:8081/healthcheck").Run()
+        # syncing = CheckStatusCode(check_url="http://192.168.137.139:8081/healthcheck").Run()
 
     # Get environment variables
     SIGNED_FILE_URL = os.environ.get('SIGNED_FILE_URL')
