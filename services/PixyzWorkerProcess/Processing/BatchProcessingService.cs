@@ -53,8 +53,7 @@ namespace PixyzWorkerProcess.Processing
         List<HttpWebRequest> WebRequests = new List<HttpWebRequest>();
         List<Stream> WriteStreams = new List<Stream>();
 
-        private ConcurrentQueue<Node> NodesToWriteAndCompress = new ConcurrentQueue<Node>();
-        //private ConcurrentQueue<Node> NodesToWrite = new ConcurrentQueue<Node>();
+        private ConcurrentQueue<Node> NodesToWrite = new ConcurrentQueue<Node>();
 
         private bool QueueComplete = false;
 
@@ -101,27 +100,23 @@ namespace PixyzWorkerProcess.Processing
             IsFileWrite = _IsFileWrite;
         }
 
-        public void AddItemToQueues(Node Item/*, Node ItemCompress*/)
+        public void AddItemToQueues(Node Item)
         {
-            NodesToWriteAndCompress.Enqueue(Item);
-            //NodesToWrite.Enqueue(Item);
+            NodesToWrite.Enqueue(Item);
         }
 
         public void StartProcessingBatchData(Action<string> _ErrorMessageAction = null)
         {
             State = RUNNING_STATE;
-            ManualResetEvent WaitCompressedFiles = new ManualResetEvent(false);
-            //ManualResetEvent WaitUnCompressedFiles = new ManualResetEvent(false);
+            ManualResetEvent WaitFiles = new ManualResetEvent(false);
 
-            ProcessQueue(_ErrorMessageAction, WaitCompressedFiles, NodesToWriteAndCompress, EDeflateCompression.Compress);
-            //ProcessQueue(_ErrorMessageAction, WaitUnCompressedFiles, NodesToWrite, EDeflateCompression.DoNotCompress);
+            ProcessQueue(_ErrorMessageAction, WaitFiles, NodesToWrite, EDeflateCompression.Compress);
 
             BTaskWrapper.Run(() =>
             {
                 try
                 {
-                    WaitCompressedFiles.WaitOne();
-                    //WaitUnCompressedFiles.WaitOne();
+                    WaitFiles.WaitOne();
 
                     if (State != FAILED_STATE)
                     {
@@ -295,8 +290,6 @@ namespace PixyzWorkerProcess.Processing
         {
             return _PubSub.CustomSubscribe("models", (Message, Json) =>
             {
-                //make two copies so that writers don't interfere with each other
-
                 try
                 {
                     byte[] MessageBytes = Convert.FromBase64String(Json);
@@ -315,7 +308,6 @@ namespace PixyzWorkerProcess.Processing
                     var FlatNodeMessage = FBNodeMessage.GetRootAsFBNodeMessage(buf);
 
                     NodeMessage MessageReceived = ConvertNodeMessage(FlatNodeMessage);
-                    //NodeMessage MessageReceivedCompressCopy = ConvertNodeMessage(FlatNodeMessage);
 
                     AddMessage(MessageReceived, _ErrorMessageAction);
                 }
@@ -432,24 +424,21 @@ namespace PixyzWorkerProcess.Processing
             return _Node;
         }
 
-        private ConcurrentDictionary<ulong, LodMessage> GeometryNodeToAssemblePlain = new ConcurrentDictionary<ulong, LodMessage>();
-        //private ConcurrentDictionary<ulong, LodMessage> GeometryNodeToAssembleCompressed = new ConcurrentDictionary<ulong, LodMessage>();
+        private ConcurrentDictionary<ulong, LodMessage> GeometryNodeToAssemble = new ConcurrentDictionary<ulong, LodMessage>();
 
         private static void MergeGeometry(ConcurrentDictionary<ulong, LodMessage> _GeometryStore, LodMessage NewMessage)
         {
-                _GeometryStore.AddOrUpdate(NewMessage.UniqueID, NewMessage, (K, V) =>
+            _GeometryStore.AddOrUpdate(NewMessage.UniqueID, NewMessage, (K, V) =>
+            {
+                for (int i = 0; i < NewMessage.LODs.Count; ++i)
                 {
-                    for (int i = 0; i < NewMessage.LODs.Count; ++i)
+                    if (NewMessage.LODs[i] != null)
                     {
-                        if (NewMessage.LODs[i] != null)
-                        {
-                            V.LODs.Add(NewMessage.LODs[i]);
-                        }
+                        V.LODs.Add(NewMessage.LODs[i]);
                     }
-                    //V.LODs.Add(NewMessage.LODs[0]);
-                    return V;
-                });
-            
+                }
+                return V;
+            });
         }
 
         private static void CompleteMerge(ConcurrentDictionary<ulong, LodMessage> _GeometryStore)
@@ -483,8 +472,7 @@ namespace PixyzWorkerProcess.Processing
 
                     //AddItemToQueues(Message.GeometryNode, MessageCompressCopy.GeometryNode);
 
-                    MergeGeometry(GeometryNodeToAssemblePlain, Message.GeometryNode);
-                    //MergeGeometry(GeometryNodeToAssembleCompressed, MessageCompressCopy.GeometryNode);
+                    MergeGeometry(GeometryNodeToAssemble, Message.GeometryNode);
                 }
 
                 if (Message.MetadataNode != null)
@@ -509,14 +497,11 @@ namespace PixyzWorkerProcess.Processing
                     if (!QueueComplete)
                     {
                         _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Received End signal for {ExpectedMessageCount} messages");
-                        CompleteMerge(GeometryNodeToAssemblePlain);
-                        //CompleteMerge(GeometryNodeToAssembleCompressed);
+                        CompleteMerge(GeometryNodeToAssemble);
 
-                        foreach (var Node in GeometryNodeToAssemblePlain)
+                        foreach (var Node in GeometryNodeToAssemble)
                         {
-                            //There should exist a copy of each message
-                            /*LodMessage Copy = GeometryNodeToAssembleCompressed[Node.Key];*/
-                            AddItemToQueues(Node.Value/*, Copy*/);
+                            AddItemToQueues(Node.Value);
                         }
 
                         SignalQueuingComplete();

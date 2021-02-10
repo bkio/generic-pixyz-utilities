@@ -41,23 +41,23 @@ def StartModelProcess(_logger):
         # Import Unzipped Files
         #system_error_message = ImportFiles(models_folder_path="/app/models", zip_main_assembly_file_name_if_any=ZIP_MAIN_ASSEMBLY_FILE_NAME_IF_ANY).Run()
 
-        # files_with_path = []
+        files_with_path = []
         # files_with_path.append("C:/tmp/models/fbx/UI-18-8101.fbx")
-        # files_with_path.append("C:/tmp/models/fbx/OLOverall.fbx")
+        files_with_path.append("C:/tmp/models/fbx/OLOverall.fbx")
         # files_with_path.append("C:/tmp/models/fbx/AREAQB.fbx")
 
-        # system_error_message = ImportFileList(files_with_path).Run()
-        system_error_message = ImportScene("C:/tmp/models/pxz/AV_EXP.pxz").Run()
+        system_error_message = ImportFileList(files_with_path).Run()
+        # system_error_message = ImportScene("C:/tmp/models/pxz/AV_EXP.pxz").Run()
 
         Logger("before operation").PrintModelInfo()
         # PixyzAlgorithms(verbose=True).RepairCAD()
         # PixyzAlgorithms(verbose=True).Tesellate()
         # PixyzAlgorithms(verbose=True).ExplodePartByMaterials()
-        # PixyzAlgorithms(verbose=True).DeletePatches()
+        PixyzAlgorithms(verbose=True).DeletePatches()
         # PixyzAlgorithms(verbose=True).DeleteLines()
-        PixyzAlgorithms(verbose=True).DeleteFreeVertices()
-        PixyzAlgorithms(verbose=True).MergePartsByAssemblies()
-        PixyzAlgorithms(verbose=True).MergeFinalLevel()
+        # PixyzAlgorithms(verbose=True).DeleteFreeVertices()
+        # PixyzAlgorithms(verbose=True).MergePartsByAssemblies()
+        # PixyzAlgorithms(verbose=True).MergeFinalLevel()
         PixyzAlgorithms(verbose=True).MakeInstanceUnique()
         # PixyzAlgorithms(verbose=True).CreateInstancesBySimilarity()
         PixyzAlgorithms(verbose=True).Triangularize()
@@ -65,7 +65,7 @@ def StartModelProcess(_logger):
         PixyzAlgorithms(verbose=True).RepairMesh()
 
         try:
-            _ModelProcess = ProcessModel(model_id, _RedisClient, number_of_thread = 20, decimate_target_strategy="ratio", lod_decimations=[-1, [0.5, 0.1, 1.0], [1.0, -1, 8.0], [3.0, -1, 15.0], 35, 50], small_object_threshold=[0, 0, 0, 0, 20, 40], scale_factor=1000)
+            _ModelProcess = ProcessModel(model_id, _RedisClient, number_of_thread = 20, decimate_target_strategy="ratio", lod_decimations=[-1, [0.5, 0.1, 1.0], [1.0, -1, 8.0], [5.0, -1, 15.0], [-1.0, 4096, 32, 100.0], [30.0, 10.0, 40.0]], small_object_threshold=[0, 0, 0, 0, 0, 0], scale_factor=1000)
             _ModelProcess.AddCustomInformation("hierarchy_id", None, True)
             _ModelProcess.Start()
         except Exception as e:

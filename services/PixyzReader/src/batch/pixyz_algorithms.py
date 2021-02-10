@@ -457,7 +457,56 @@ class PixyzAlgorithms():
 
         if self.verbose:
             Logger(f"after smartHiddenRemoval").PrintModelInfo(self.root)
-    
+
+    def HiddenRemoval(self, occurrences = [], level = 2, resolution = 4096, sphereCount = 16, fovX = 90, considerTransparentOpaque = False, adjacencyDepth = 1):
+        """
+         Delete parts, patches or polygons not viewed from a sphere around the scene
+
+        - Parameters: \n
+            - occurrences (OccurrenceList) : Occurrences of components to process\n
+            - level (SelectionLevel) : Level of parts to remove : Parts (0), Patches (1) or Polygons (2)\n
+            - resolution (Int) : Resolution of the visibility viewer. High=4096, Medium=2048, Low=1024, etc.\n
+            - sphereCount (Int) : Segmentation of the sphere sphereCount x sphereCount\n
+            - fovX (Double) [optional] : Horizontal field of view (in degree)\n
+            - considerTransparentOpaque (Boolean) [optional] : If True, Parts, Patches or Polygons with a transparent appearance are considered as opaque\n
+            - adjacencyDepth (Int) [optional] : Mark neighbors polygons as visible\n
+        - Returns:\n
+            - void\n
+
+        """
+        if len(occurrences) == 0:
+            occurrences = [self.root]
+
+        algo.hiddenRemoval(occurrences, level, resolution, sphereCount, fovX, considerTransparentOpaque)
+
+        if self.verbose:
+            Logger(f"after hiddenRemoval").PrintModelInfo(self.root)
+
+    def IdentifyPatches(self, occurrences = [], useAttributesFilter = True, useSharpEdgeFilter = True, sharpAngle = -1, useBoundaryFilter = True, useNonManifoldFilter = True, useLineEdgeFilter = True, useQuadLineFilter = False):
+        """
+         Create cad patches on tessellation (needed by some functions)
+
+        - Parameters: \n
+            - occurrences (OccurrenceList) : Occurrences of components to process\n
+            - useAttributesFilter (Boolean) [optional] : Filters by attributes\n
+            - useSharpEdgeFilter (Boolean) [optional] : Filters by edge sharpness\n
+            - sharpAngle (Angle) [optional] : Sharp angle in degree, if negative the default sharp angle value is used\n
+            - useBoundaryFilter (Boolean) [optional] : Filters by boundaries\n
+            - useNonManifoldFilter (Boolean) [optional] : Filters by manifold-ness\n
+            - useLineEdgeFilter (Boolean) [optional] : Filters by edge\n
+            - useQuadLineFilter (Boolean) [optional] : Filters by quad lines\n
+        - Returns:\n
+            - void\n
+
+        """
+        if len(occurrences) == 0:
+            occurrences = [self.root]
+
+        algo.identifyPatches(occurrences, useAttributesFilter, useSharpEdgeFilter, sharpAngle, useBoundaryFilter, useNonManifoldFilter, useLineEdgeFilter, useQuadLineFilter)
+
+        if self.verbose:
+            Logger(f"after identifyPatches").PrintModelInfo(self.root)
+
     def DeleteOccurrences(self, occurrences = []):
         """
          Delete a list of occurrences

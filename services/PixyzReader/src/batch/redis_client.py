@@ -2,7 +2,6 @@ import redis
 import base64
 import zlib
 import time
-import json
 import sys
 import flatbuffers
 from .FB.FBNodeMessage import *
@@ -42,7 +41,6 @@ class RedisClient:
         return self.message_count
 
     def DeflateEncodeBase64(self, message):
-        # compressed_message = zlib.compress(bytes(message, 'utf-8'))[2:-4]
         compressed_message = zlib.compress(message)[2:-4]
         return base64.b64encode(compressed_message)
 
@@ -57,7 +55,8 @@ class RedisClient:
         - Returns:\n
             - void\n
         """
-        self.message_count = self.message_count + 1
+        with self.thread_lock:
+            self.message_count = self.message_count + 1
         
         base64_message = self.DeflateEncodeBase64(data_buffer)
 
@@ -94,6 +93,7 @@ class RedisClient:
         - Returns:\n
             - void\n
         """
+        time.sleep(60)
         fbbuilder = flatbuffers.Builder(2048)
         FBNodeMessageStart(fbbuilder)
         FBNodeMessageAddModelID(fbbuilder, int(self.model_id))
@@ -114,6 +114,7 @@ class RedisClient:
         - Returns:\n
             - void\n
         """
+        time.sleep(60)
         fbbuilder = flatbuffers.Builder(2048)
         errors_string = fbbuilder.CreateString(str(error_messages))
         FBNodeMessageStart(fbbuilder)
