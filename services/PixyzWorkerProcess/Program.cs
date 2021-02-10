@@ -94,7 +94,7 @@ namespace PixyzWorkerProcess
                 ServInit.RequiredEnvironmentVariables["CAD_PROCESS_NOTIFY_URL"],
                 IsFileWrite);
 
-            BatchProcessingService.Instance.StartProcessingBatchData((Message) => { Console.WriteLine(Message); });
+            BatchProcessingService.Instance.RunResetProcessLoop((Message) => { Console.WriteLine(Message); });
 
 
             //if (!IsFileWrite)
@@ -103,7 +103,8 @@ namespace PixyzWorkerProcess
 
                 var WebServiceEndpoints = new List<BWebPrefixStructure>()
             {
-                new BWebPrefixStructure(new string[] { "/healthcheck" }, () => new HealthCheckRequest())
+                new BWebPrefixStructure(new string[] { "/healthcheck" }, () => new HealthCheckRequest()),
+                new BWebPrefixStructure(new string[] { "/endprocess" }, () => new CheckProcessCompleteRequest())
             };
 
                 var BWebService = new BWebService(WebServiceEndpoints.ToArray(), ServInit.ServerPort, ServInit.TracingService);

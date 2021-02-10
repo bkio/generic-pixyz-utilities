@@ -1,6 +1,6 @@
 ﻿using BWebServiceUtilities;
-using ServiceUtilities.All;
 using PixyzWorkerProcess.Processing;
+using ServiceUtilities.All;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -8,7 +8,7 @@ using System.Text;
 
 namespace PixyzWorkerProcess.Endpoints
 {
-    public class HealthCheckRequest : BppWebServiceBase
+    class CheckProcessCompleteRequest: BppWebServiceBase
     {
         protected override BWebServiceResponse OnRequestPP(HttpListenerContext _Context, Action<string> _ErrorMessageAction = null)
         {
@@ -25,15 +25,16 @@ namespace PixyzWorkerProcess.Endpoints
         {
             try
             {
-                if (BatchProcessingService.Instance.QueueReady)
+                if (BatchProcessingService.Instance.CheckProcessComplete())
                 {
                     return BWebResponse.StatusOK(BatchProcessingService.Instance.State);
-                }else
+                }
+                else
                 {
                     return BWebResponse.NotAcceptable("Queue not ready");
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _ErrorMessageAction?.Invoke($"{ex.Message}\n{ex.StackTrace}");
                 return BWebResponse.InternalError("Failed to get state");

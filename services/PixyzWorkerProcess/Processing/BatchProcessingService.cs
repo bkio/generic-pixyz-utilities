@@ -23,6 +23,7 @@ namespace PixyzWorkerProcess.Processing
         private const string FAILED_STATE = "Failed";
         private const string RUNNING_STATE = "Running";
         private const string SUCCESS_STATE = "Succeeded";
+
         public static BatchProcessingService Instance { get; private set; }
 
         private string InternalState = "Waiting";
@@ -46,6 +47,13 @@ namespace PixyzWorkerProcess.Processing
                 }
             }
         }
+        public bool QueueReady
+        {
+            get
+            {
+                return !QueueComplete;
+            }
+        }
 
         private IBMemoryServiceInterface MemoryService;
         private readonly HttpClient Client = new HttpClient();
@@ -55,12 +63,23 @@ namespace PixyzWorkerProcess.Processing
 
         private ConcurrentQueue<Node> NodesToWrite = new ConcurrentQueue<Node>();
 
-        private bool QueueComplete = false;
 
+        private List<HierarchyNode> HierarchyNodeCache = new List<HierarchyNode>();
+        private List<MetadataNode> MetadataNodeCache = new List<MetadataNode>();
+
+
+        private ConcurrentDictionary<ulong, LodMessage> GeometryNodeToAssemble = new ConcurrentDictionary<ulong, LodMessage>();
+
+        private bool QueueComplete = false;
+        public bool WriteComplete = false;
+        public ManualResetEvent WriteCompleteWait = new ManualResetEvent(false);
+
+        private bool HierarchyWritten = false;
 
         private Dictionary<EProcessedFileType, string> UploadUrls = new Dictionary<EProcessedFileType, string>();
         private bool IsFileWrite = false;
 
+        private int CurrentFileSet = -1;
 
         private string NotifyDoneUrl = "";
 
@@ -96,7 +115,6 @@ namespace PixyzWorkerProcess.Processing
             UploadUrls.Add(EProcessedFileType.METADATA_CF, _MetadataCompressed);
 
             NotifyDoneUrl = _NotifyDoneUrl;
-
             IsFileWrite = _IsFileWrite;
         }
 
@@ -105,10 +123,14 @@ namespace PixyzWorkerProcess.Processing
             NodesToWrite.Enqueue(Item);
         }
 
-        public void StartProcessingBatchData(Action<string> _ErrorMessageAction = null)
+        public ManualResetEvent StartProcessingBatchData(Action<string> _ErrorMessageAction = null)
         {
+            CurrentFileSet++;
+
             State = RUNNING_STATE;
+            
             ManualResetEvent WaitFiles = new ManualResetEvent(false);
+            ManualResetEvent GlobalWait = new ManualResetEvent(false);
 
             ProcessQueue(_ErrorMessageAction, WaitFiles, NodesToWrite, EDeflateCompression.Compress);
 
@@ -124,6 +146,7 @@ namespace PixyzWorkerProcess.Processing
                     }
                     else
                     {
+                        //Just set the state, health checker should see this and take action
                         _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Write Failed");
                     }
                 }
@@ -132,6 +155,46 @@ namespace PixyzWorkerProcess.Processing
                     _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] {ex.Message}\n{ex.StackTrace}");
                     //Just set the state, health checker should see this and take action
                     State = FAILED_STATE;
+                }
+                finally
+                {
+                    GlobalWait.Set();
+                }
+            });
+
+            return GlobalWait;
+        }
+
+        public bool CheckProcessComplete()
+        {
+            if(WriteComplete)
+            {
+                WriteComplete = false;
+                WriteCompleteWait.Set();
+                return true;
+            }else
+            {
+                return false;
+            }
+        }
+
+        public void RunResetProcessLoop(Action<string> _ErrorMessageAction = null)
+        {
+            BTaskWrapper.Run(() =>
+            {
+                while(true)
+                {
+                    ManualResetEvent Wait = StartProcessingBatchData(_ErrorMessageAction);
+                    Wait.WaitOne();
+
+                    GeometryNodeToAssemble.Clear();
+                    NodesToWrite.Clear();
+                    QueueComplete = false;
+                    WriteComplete = true;
+                    HierarchyWritten = false;
+                    WriteCompleteWait.WaitOne();
+
+                    WriteCompleteWait.Reset();
                 }
             });
         }
@@ -144,6 +207,7 @@ namespace PixyzWorkerProcess.Processing
                 {
                     _ErrorMessageAction?.Invoke($"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fffff")}] Start processing Queue");
                     Dictionary<ENodeType, StreamStruct> WriteStreams = CreateStreams(QueueCompressMode);
+
                     using (XStreamWriter Writer = new XStreamWriter(WriteStreams))
                     {
                         while (!QueueComplete || ProcessQueue.Count > 0)
@@ -158,6 +222,7 @@ namespace PixyzWorkerProcess.Processing
                                     CheckHierarchyNode(CurrentHierarchyNode);
 
                                     Writer.Write(CurrentHierarchyNode);
+                                    
                                 }
 
                                 if (WriteNode.GetNodeType() == ENodeType.Geometry)
@@ -235,10 +300,41 @@ namespace PixyzWorkerProcess.Processing
         /// </summary>
         public void SignalQueuingComplete()
         {
+            if(!HierarchyWritten)
+            {
+                for(int i = 0; i < HierarchyNodeCache.Count; ++i)
+                {
+                    NodesToWrite.Enqueue(CopyHierarchy(HierarchyNodeCache[i]));
+                }
+                for(int i = 0; i < MetadataNodeCache.Count; ++i)
+                {
+                    NodesToWrite.Enqueue(CopyMetadata(MetadataNodeCache[i]));
+                }
+            }
+
             QueueComplete = true;
         }
 
+        private HierarchyNode CopyHierarchy(HierarchyNode NodeToCopy)
+        {
+            byte[] CopyBytes = new byte[NodeToCopy.GetSize()];
+            NodeToCopy.ToBytes(CopyBytes, 0);
+            HierarchyNode CopyNode = new HierarchyNode();
+            CopyNode.FromBytes(CopyBytes, 0);
 
+            return CopyNode;
+        }
+
+        
+        private MetadataNode CopyMetadata(MetadataNode NodeToCopy)
+        {
+            byte[] CopyBytes = new byte[NodeToCopy.GetSize()];
+            NodeToCopy.ToBytes(CopyBytes, 0);
+            MetadataNode CopyNode = new MetadataNode();
+            CopyNode.FromBytes(CopyBytes, 0);
+
+            return CopyNode;
+        }
 
         public void EndProcessingBatchData(Action<string> _ErrorMessageAction)
         {
@@ -291,7 +387,6 @@ namespace PixyzWorkerProcess.Processing
             return _PubSub.CustomSubscribe("models", (Message, Json) =>
             {
                 //make two copies so that writers don't interfere with each other
-
                 try
                 {
                     byte[] MessageBytes = Convert.FromBase64String(Json);
@@ -304,9 +399,7 @@ namespace PixyzWorkerProcess.Processing
                     }
 
                     string DecompressedMessage = Encoding.UTF8.GetString(OutputStream.ToArray());
-
                     NodeMessage MessageReceived = JsonConvert.DeserializeObject<NodeMessage>(DecompressedMessage);
-
                     AddMessage(MessageReceived, _ErrorMessageAction);
                 }
                 catch (Exception ex)
@@ -316,8 +409,6 @@ namespace PixyzWorkerProcess.Processing
 
             });
         }
-
-        private ConcurrentDictionary<ulong, LodMessage> GeometryNodeToAssemble = new ConcurrentDictionary<ulong, LodMessage>();
 
         private static void MergeGeometry(ConcurrentDictionary<ulong, LodMessage> _GeometryStore, LodMessage NewMessage)
         {
@@ -353,11 +444,16 @@ namespace PixyzWorkerProcess.Processing
 
                 if (Message.HierarchyNode != null)
                 {
-                    if(Message.HierarchyNode.ParentID == Message.HierarchyNode.UniqueID)
+                    HierarchyWritten = true;
+
+                    if (Message.HierarchyNode.ParentID == Message.HierarchyNode.UniqueID)
                     {
                         Message.HierarchyNode.ParentID = Node.UNDEFINED_ID;
                     }
-                    AddItemToQueues(Message.HierarchyNode);
+
+                    HierarchyNodeCache.Add(Message.HierarchyNode);
+
+                    AddItemToQueues(CopyHierarchy(Message.HierarchyNode));
                 }
 
                 if (Message.GeometryNode != null)
@@ -370,7 +466,9 @@ namespace PixyzWorkerProcess.Processing
 
                 if (Message.MetadataNode != null)
                 {
-                    AddItemToQueues(Message.MetadataNode);
+                    MetadataNodeCache.Add(Message.MetadataNode);
+
+                    AddItemToQueues(CopyMetadata(Message.MetadataNode));
                 }
 
                 Interlocked.Increment(ref QueuedMessageCount);
@@ -467,46 +565,47 @@ namespace PixyzWorkerProcess.Processing
 
         private Dictionary<ENodeType, StreamStruct> CreateFileStreams(EDeflateCompression CompressMode)
         {
+            WriteStreams.Clear();
+
             Dictionary<ENodeType, StreamStruct> Streams = new Dictionary<ENodeType, StreamStruct>();
 
             EProcessedFileType HierarchyFileType = EProcessedFileType.HIERARCHY_RAF;
+            EProcessedFileType GeometryFileType = EProcessedFileType.GEOMETRY_RAF;
+            EProcessedFileType MetadateFileType = EProcessedFileType.METADATA_RAF;
+
+            string Ext = "x3dp_";
+
             if (CompressMode == EDeflateCompression.Compress)
             {
+                Ext = "x3dc_";
+                GeometryFileType = EProcessedFileType.GEOMETRY_CF;
                 HierarchyFileType = EProcessedFileType.HIERARCHY_CF;
+                MetadateFileType = EProcessedFileType.METADATA_CF;
             }
 
-            Stream WriteHierarchyStream = new FileStream(UploadUrls[HierarchyFileType], FileMode.Create);
+            Stream WriteHierarchyStream = new FileStream($"{UploadUrls[HierarchyFileType]}-{CurrentFileSet}.{Ext}h", FileMode.Create);
+
             lock (WriteStreams)
             {
                 WriteStreams.Add(WriteHierarchyStream);
             }
+
             StreamStruct HierarchyStreamStruct = new StreamStruct(WriteHierarchyStream, CompressMode);
+            Stream WriteGeometryStream = new FileStream($"{UploadUrls[GeometryFileType]}-{CurrentFileSet}.{Ext}g", FileMode.Create);
 
-
-            EProcessedFileType GeometryFileType = EProcessedFileType.GEOMETRY_RAF;
-            if (CompressMode == EDeflateCompression.Compress)
-            {
-                GeometryFileType = EProcessedFileType.GEOMETRY_CF;
-            }
-
-            Stream WriteGeometryStream = new FileStream(UploadUrls[GeometryFileType], FileMode.Create);
             lock (WriteStreams)
             {
                 WriteStreams.Add(WriteGeometryStream);
             }
+
             StreamStruct GeometryStreamStruct = new StreamStruct(WriteGeometryStream, CompressMode);
+            Stream WriteMetadataStream = new FileStream($"{UploadUrls[MetadateFileType]}-{CurrentFileSet}.{Ext}m", FileMode.Create);
 
-            EProcessedFileType MetadateFileType = EProcessedFileType.METADATA_RAF;
-            if (CompressMode == EDeflateCompression.Compress)
-            {
-                MetadateFileType = EProcessedFileType.METADATA_CF;
-            }
-
-            Stream WriteMetadataStream = new FileStream(UploadUrls[MetadateFileType], FileMode.Create);
             lock (WriteStreams)
             {
                 WriteStreams.Add(WriteMetadataStream);
             }
+
             StreamStruct MetadataStreamStruct = new StreamStruct(WriteMetadataStream, CompressMode);
 
             Streams.Add(ENodeType.Hierarchy, HierarchyStreamStruct);
@@ -523,12 +622,18 @@ namespace PixyzWorkerProcess.Processing
                 return CreateFileStreams(CompressMode);
             }
 
+            WebRequests.Clear();
             Dictionary<ENodeType, StreamStruct> Streams = new Dictionary<ENodeType, StreamStruct>();
 
             EProcessedFileType HierarchyFileType = EProcessedFileType.HIERARCHY_RAF;
+            EProcessedFileType GeometryFileType = EProcessedFileType.GEOMETRY_RAF;
+            EProcessedFileType MetadateFileType = EProcessedFileType.METADATA_RAF;
+
             if (CompressMode == EDeflateCompression.Compress)
             {
                 HierarchyFileType = EProcessedFileType.HIERARCHY_CF;
+                GeometryFileType = EProcessedFileType.GEOMETRY_CF;
+                MetadateFileType = EProcessedFileType.METADATA_CF;
             }
 
             HttpWebRequest HierarchyRequest = CreateWebRequest(UploadUrls[HierarchyFileType]);
@@ -540,12 +645,6 @@ namespace PixyzWorkerProcess.Processing
             StreamStruct HierarchyStreamStruct = new StreamStruct(WriteHierarchyStream, CompressMode);
 
 
-            EProcessedFileType GeometryFileType = EProcessedFileType.GEOMETRY_RAF;
-            if (CompressMode == EDeflateCompression.Compress)
-            {
-                GeometryFileType = EProcessedFileType.GEOMETRY_CF;
-            }
-
             HttpWebRequest GeometryRequest = CreateWebRequest(UploadUrls[GeometryFileType]);
             lock (WebRequests)
             {
@@ -554,12 +653,6 @@ namespace PixyzWorkerProcess.Processing
             Stream WriteGeometryStream = GeometryRequest.GetRequestStream();
             StreamStruct GeometryStreamStruct = new StreamStruct(WriteGeometryStream, CompressMode);
 
-
-            EProcessedFileType MetadateFileType = EProcessedFileType.METADATA_RAF;
-            if (CompressMode == EDeflateCompression.Compress)
-            {
-                MetadateFileType = EProcessedFileType.METADATA_CF;
-            }
 
             HttpWebRequest MetadataRequest = CreateWebRequest(UploadUrls[MetadateFileType]);
             lock (WebRequests)
