@@ -107,13 +107,14 @@ class PixyzAlgorithms():
             - void\n
 
         """
-        if len(occurrences) == 0:
-            occurrences = [self.root]
+        if self.HasMultipleSubMaterials():        
+            if len(occurrences) == 0:
+                occurrences = [self.root]
 
-        algo.explodePartByMaterials(occurrences)
-        
-        if self.verbose:
-            Logger('after explodePartByMaterials').PrintModelInfo(self.root)
+            algo.explodePartByMaterials(occurrences)
+            
+            if self.verbose:
+                Logger('after explodePartByMaterials').PrintModelInfo(self.root)
 
     def DeletePatches(self, occurrences = [], keepOnePatchByMaterial = True):
         """
@@ -519,3 +520,39 @@ class PixyzAlgorithms():
         """
         
         scene.deleteOccurrences(occurrences)
+
+    def TransferCADMaterialsOnPartOccurrences(self):
+        """
+         Set all materials on part occurrences
+
+        - Parameters: \n
+            - void\n
+        - Returns:\n
+            - void\n
+
+        """
+        scene.transferCADMaterialsOnPartOccurrences(self.root)
+
+        if self.verbose:
+            Logger(f"after transferCADMaterialsOnPartOccurrences").PrintModelInfo(self.root)
+
+    def HasMultipleSubMaterials(self):
+        """
+         It returns True if one of the part occurrences has more than 1 material. It needs 
+
+        - Parameters: \n
+            - void\n
+        - Returns:\n
+            - void\n
+
+        """
+        part_occurrences = scene.getPartOccurrences(self.root)
+        hasMultipleSubMaterials = False
+        for occurrence in part_occurrences:
+            component = scene.getComponent(occurrence, 0, True)
+            partSubMaterialsCount = len(scene.listPartSubMaterials(component))
+            if partSubMaterialsCount > 1:
+                hasMultipleSubMaterials = True
+                break
+        
+        return hasMultipleSubMaterials
