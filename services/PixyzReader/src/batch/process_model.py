@@ -8,6 +8,7 @@ from .metadata_node import MetadataNode
 from .hierarchy_node import HierarchyNode
 from .geometry_node import GeometryNode
 from .pixyz_algorithms import PixyzAlgorithms
+from .export_scene import ExportScene
 
 import pxz
 try:# Prevent IDE errors
@@ -63,6 +64,23 @@ class ProcessModel:
             ending_process = False
             while (ending_process != True):
                 ending_process = CheckStatusCode(check_url="http://127.0.0.1:8081/endprocess").Run()
+    
+    def StartExport(self):
+        Logger().Warning("=====> Model processing has been started, please wait processing...")
+        self.ApplyCustomInformations(self.root)
+
+        if len(self.lod_decimations) <= 0:
+            self.lod_decimations = [-1]
+        
+        for current_lod_level in range(len(self.lod_decimations)):
+            file_name = "C:/tmp/AV_EXP_lod"+ str(current_lod_level)
+            if current_lod_level == 0:
+                ExportScene((file_name + ".fbx")).Run()
+                ExportScene((file_name + ".gltf")).Run()
+            else:
+                self.ApplyDecimateAlgorithms(current_lod_level)
+                ExportScene((file_name + ".fbx")).Run()
+                ExportScene((file_name + ".gltf")).Run()
 
     def UpdatePartInformation(self):
         self.part_occurrences = scene.getPartOccurrences(self.root)
