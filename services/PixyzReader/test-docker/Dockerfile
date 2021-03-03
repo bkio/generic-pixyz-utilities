@@ -1,5 +1,4 @@
-# Using pixyz batch image
-FROM pixyzinc/batch:2020.1.2.16
+FROM ubuntu:20.04
 
 # Copy Pixyz License file to PiXYZStudio/licenses folder
 COPY pixyz.lic /usr/share/PiXYZStudio/licenses/pixyz.lic
@@ -30,11 +29,11 @@ WORKDIR /app
 # Copy our requirements.txt
 COPY requirements.txt .
 
-# Install requirements.txt to PixyzBatch target
-RUN pip install -r requirements.txt -t /opt/PiXYZBatch-2020.1.2.16-amd64/pythonDlls/lib-dynload
+# Install requirements.txt
+RUN pip install -r requirements.txt
 
 # Copy src code to workdir inside the container
 COPY src/ .
 
-# Execute from PixyzBatchLauncher
-ENTRYPOINT "/usr/bin/PiXYZBatchLaucher" "/app/main.py"
+# Start bash when you need to access for checking files
+CMD ["bash"]
